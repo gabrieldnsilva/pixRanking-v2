@@ -3,15 +3,22 @@
 [![Progresso](https://img.shields.io/badge/Progresso-Em%20Andamento-blue.svg)](https://github.com/gabrieldnsilva/rankingPixDebito)
 [![Prioridades](https://img.shields.io/badge/Prioridades-3%20Ativas-green.svg)](https://github.com/gabrieldnsilva/rankingPixDebito)
 
-> 🚀 Lista de tarefas para otimizar e expandir o sistema de ranking de operadoras. Baseado nas funcionalidades descritas em [docs/features.md](docs/features.md) e alinhado com o roadmap do projeto.
+> 🚀 Lista de tarefas para otimizar e expandir o sistema de ranking de operadoras. Baseado nas funcionalidades descritas em [docs/features.md](https://github.com/gabrieldnsilva/pixRanking-v2/blob/main/docs/features.md) e alinhado com o roadmap do projeto.
 
 ## 🔄 Tarefas em Andamento
+
+## 🚨 Crítico
+
+-   🔄 **Importação automática do arquivo operators.json** - A importação dos dados de operadoras não pode ser manual.
+-   🔄 **CRUD para manipulação do operators.json** - Com o consumo do arquivo operators.json, deve ser disponibilizada uma forma de manipulá-lo de forma interativa.
+-   🔄 **Autenticação para proteção de CREATE, UPDATE E DELETE** - Implementar um sistema de autenticação para garantir que apenas usuários autorizados possam modificar os dados.
 
 -   ✅ **Implementar "Collapsable Sidebar"** - Sidebar dinâmica concluída e integrada ao UI.
 -   ✅ **Adicionar funcionalidade de exportação de dados (CSV, PDF)** - Exportação básica implementada; refine para múltiplos formatos.
 -   🔄 **Melhorar responsividade do sidebar** - Ajustes em andamento para dispositivos móveis.
+-   🔄 **Melhorar responsividade do sidebar** - Ajustes em andamento para dispositivos móveis.
 -   🔄 **Melhorar a performance do carregamento dos dados** - Otimizar parsing de CSV e JSON para grandes volumes.
--   🔄 **Atualizar documentação do projeto com novas funcionalidades** - Revisar README.md e adicionar seções em [docs/features.md](docs/features.md).
+-   🔄 **Atualizar documentação do projeto com novas funcionalidades** - Revisar README.md e adicionar seções em [docs/features.md](https://github.com/gabrieldnsilva/pixRanking-v2/blob/main/docs/features.md).
 -   🔄 **Melhorar a acessibilidade do dashboard** - Adicionar suporte a leitores de tela e navegação por teclado.
 
 ## 🚀 Futuras Melhorias
