@@ -80,4 +80,4 @@ Para dúvidas ou sugestões, abra uma issue no GitHub ou entre em contato com a 
 
 ## 📝 To-Do List
 
-# Veja [docs/ToDo.md](https://github.com/gabrieldnsilva/pixRanking-v2/blob/main/docs/ToDo.md) para a lista completa de tarefas e melhorias planejadas.
+-   Veja [docs/ToDo.md](https://github.com/gabrieldnsilva/pixRanking-v2/blob/main/docs/ToDo.md) para a lista completa de tarefas e melhorias planejadas.
