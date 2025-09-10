@@ -78,4 +78,6 @@ Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes
 
 Para dúvidas ou sugestões, abra uma issue no GitHub ou entre em contato com a equipe de desenvolvimento.
 
-    ```
+## 📝 To-Do List
+
+# Veja [docs/ToDo.md](https://github.com/gabrieldnsilva/pixRanking-v2/blob/main/docs/ToDo.md) para a lista completa de tarefas e melhorias planejadas.
