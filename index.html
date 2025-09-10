@@ -62,6 +62,18 @@
 								hidden
 							/>
 						</li>
+						<p class="nav-section-title mt-4">Gerenciamento</p>
+						<ul class="nav-list">
+							<li>
+								<a
+									href="#"
+									id="manage-operators-link"
+									class="nav-link"
+									><i class="ri-settings-3-line"></i
+									><span>Gerenciar Operadoras</span></a
+								>
+							</li>
+						</ul>
 					</ul>
 				</nav>
 				<div class="sidebar-footer">
@@ -90,9 +102,8 @@
 							</div>
 							<div class="card-body">
 								<p class="text-muted">
-									Selecione os arquivos de operadoras e
-									transações na barra lateral para gerar o
-									ranking
+									Selecione os arquivos de transações na barra
+									lateral para gerar o ranking
 								</p>
 								<div class="table-responsive">
 									<table
@@ -103,9 +114,8 @@
 												<th>Posição</th>
 												<th>Nome</th>
 												<th>Nº Operadora</th>
-												<th>Total Transações PIX</th>
+												<th>Transações PIX</th>
 												<th>Proporção PIX</th>
-												<th>Ações</th>
 											</tr>
 										</thead>
 										<tbody id="ranking-body"></tbody>
@@ -118,6 +128,50 @@
 								>
 									<i class="ri-file-pdf-2-fill"></i> Exportar
 									Ranking (PDF)
+								</button>
+							</div>
+						</div>
+					</section>
+					<section id="crud-view" class="view">
+						<div class="card shadow-sm">
+							<div
+								class="card-header d-flex justify-content-between align-items-center"
+							>
+								<h3>Gerenciamento de Operadoras</h3>
+								<button
+									id="add-operator-btn"
+									class="btn btn-success"
+								>
+									<i class="ri-add-line"></i> Adicionar
+									Operadora
+								</button>
+							</div>
+							<div class="card-body">
+								<p class="text-muted">
+									Adicione, edite ou remova operadoras. As
+									alterações só serão salvas no servidor após
+									clickar em "Salvar Alterações".
+								</p>
+								<div class="table-responsive">
+									<table
+										class="table table-hover align-middle"
+									>
+										<thead>
+											<tr>
+												<th>Nome da Operadora</th>
+												<th>Nº da Operadora</th>
+												<th class="text-end">Ações</th>
+											</tr>
+										</thead>
+										<tbody id="crud-table-body"></tbody>
+									</table>
+								</div>
+								<button
+									id="save-changes-btn"
+									class="btn btn-primary mt-3"
+								>
+									<i class="ri-save-3-line"></i>Salvar
+									Alterações
 								</button>
 							</div>
 						</div>
@@ -160,6 +214,73 @@
 						</div>
 					</section>
 				</main>
+			</div>
+			/
+		</div>
+		<div
+			class="modal fade"
+			id="operator-modal"
+			tabindex="-1"
+			aria-labelledby="operator-modal-label"
+			aria-hidden="true"
+		>
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="operator-modal-label">
+							Adicionar Operadora
+						</h5>
+						<button
+							type="button"
+							class="btn-close"
+							data-bs-dismiss="modal"
+							aria-label="Close"
+						></button>
+					</div>
+					<div class="modal-body">
+						<form id="operator-form">
+							<input type="hidden" id="operador-id-hidden" />
+							<div class="mb-3">
+								<label for="operator-name" class="form-label"
+									>Nome da operadora</label
+								>
+								<input
+									type="text"
+									class="form-control"
+									id="operator-name"
+									required
+								/>
+							</div>
+							<div class="mb-3">
+								<label for="operator-number" class="form-label"
+									>Nº da Operadora</label
+								>
+								<input
+									type="number"
+									class="form-control"
+									id="operator-number"
+									required
+								/>
+							</div>
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button
+							type="button"
+							class="btn btn-secondary"
+							data-bs-dismiss="modal"
+						>
+							Cancelar
+						</button>
+						<button
+							type="button"
+							id="save-operator-form-btn"
+							class="btn btn-primary"
+						>
+							Salvar
+						</button>
+					</div>
+				</div>
 			</div>
 		</div>
 		<script
