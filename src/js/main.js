@@ -67,13 +67,46 @@ function setupFileUploadListener(
 	});
 }
 
+/**
+ * Carregar o JSON inicialmente
+ * Tenta carregar o arquivo 'operators.json' na inicialização
+ * Este será o método padrão de carregamento de operadores.
+ */
 
-// Configurando os listeners de forma limpa e sem repetição
+function loadInitialOperators() {
+	$.getJSON("data/operators.json")
+		.done(function (data) {
+			// Se bem-sucedido
+			console.log("Arquivo operators.json carregado com sucesso:", data);
+			appData.operators = data;
+
+			// Atualiza a UI para refletir o carregamento
+			const $label = $("label[for='json-upload'] span");
+			$label.text("Operadoras carregadas");
+			$label.parent().addClass("loaded");
+
+			checkAndProcessData();
+		})
+		.fail(function (jqXHR, textStatus, errorThrown) {
+			// Falha. Provavelmente o arquivo não existe.
+			console.warn(
+				"data/operators.json não encontrado. Aguardando upload manual."
+			);
+			// Não faz nada, espera o upload manual.
+		});
+}
+
+// --- INICIALIZAÇÃO DA APLICAÇÃO ---
+
+// 1. Tenta carregar as operadoras do arquivo padrão
+loadInitialOperators();
+
+// 2. Configura os listeners para upload manual (que agora serve como override)
 setupFileUploadListener(
 	"#json-upload",
 	readJsonFile,
 	"operators",
-	"Operadoras carregadas:"
+	"Operadoras substituídas via upload:"
 );
 setupFileUploadListener(
 	"#pix-upload",
