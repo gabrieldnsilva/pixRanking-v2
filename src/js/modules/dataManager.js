@@ -34,6 +34,7 @@ export function readCsvFile(file) {
 			skipEmptyLines: true,
 			dynamicTyping: true,
 			complete: (results) => {
+				console.log("CSV parseado:", results.data);
 				resolve(results.data);
 			},
 			error: (error) => {

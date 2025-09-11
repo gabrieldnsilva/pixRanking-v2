@@ -66,7 +66,10 @@ export function showUploadStatus(initialStatus = {}) {
 		allowEscapeKey: false, // Impede que a tecla "Esc" feche o modal
 		showConfirmButton: false,
 		timerProgressBar: true,
-		timer: 3000, // Fecha automaticamente após 60 segundos
+		timer: 3000, // Apenas para evitar que o modal fique aberto para sempre
+		didOpen: () => {
+			Swal.showLoading();
+		},
 		willOpen: () => {},
 	});
 }
@@ -91,6 +94,5 @@ export function updateUploadStatus(fileKey) {
 
 export function closeUploadStatusAndShowSuccess() {
 	Swal.close();
-	showSuccessToast;
-	("Dados processados com sucesso!");
+	showSuccessToast("Dados processados com sucesso!");
 }

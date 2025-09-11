@@ -1,3 +1,5 @@
+import { switchView } from "./utils.js";
+
 /**
  * Módulo para manipular a interface do usuário (DOM).
  */
@@ -7,6 +9,88 @@ let currentPage = 1;
 const ROWS_PER_PAGE = 10;
 let fullRankedData = []; // Armazena todos os dados para paginação
 let chartInstance = null; // Instância do gráfico
+let individualChartInstance = null; // Instância do gráfico individual
+
+/**
+ * Mostra a tela de detalhes de uma operadora específica
+ * @param {number} operatorId - o ID da operadora a ser exibida
+ */
+function displayIndividualMetrics(operatorId) {
+	// Encontra o objeto completo da operadora no nosso array de dados
+	const operatorData = fullRankedData.find(
+		(op) => op.numero_operadora == operatorId
+	);
+	if (!operatorData) return;
+
+	// Atualiza o título da seção e o resumo
+	$("#individual-operator-name").text(
+		`Métricas de: ${operatorData.nome_operadora}`
+	);
+	$("#metrics-summary").html(`
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item"><strong>Nº da Operadora:</strong> ${
+				operatorData.numero_operadora
+			}</li>
+            <li class="list-group-item"><strong>Transações PIX:</strong> ${operatorData.pixTransactions.toLocaleString(
+				"pt-BR"
+			)}</li>
+            <li class="list-group-item"><strong>Transações Débito:</strong> ${operatorData.debitTransactions.toLocaleString(
+				"pt-BR"
+			)}</li>
+            <li class="list-group-item"><strong>Total de Transações:</strong> ${operatorData.totalTransactions.toLocaleString(
+				"pt-BR"
+			)}</li>
+            <li class="list-group-item"><strong>Proporção PIX:</strong> ${(
+				operatorData.pixProportion * 100
+			).toFixed(2)}%</li>
+        </ul>
+        <p class="mt-3 text-muted">O gráfico ao lado mostra a proporção de transações. As operações em Débito são potenciais operações em PIX que podem ser convertidas.</p>
+    `);
+
+	// Renderiza o gráfico de pizza
+	const ctx = document.getElementById("metrics-chart").getContext("2d");
+	const data = [operatorData.pixTransactions, operatorData.debitTransactions];
+
+	if (individualChartInstance) {
+		individualChartInstance.destroy();
+	}
+
+	individualChartInstance = new Chart(ctx, {
+		type: "pie",
+		data: {
+			labels: ["PIX", "Débito"],
+			datasets: [
+				{
+					data: data,
+					backgroundColor: [
+						"rgba(75, 192, 192, 0.7)",
+						"rgba(255, 99, 132, 0.7)",
+					],
+					borderColor: [
+						"rgba(75, 192, 192, 1)",
+						"rgba(255, 99, 132, 1)",
+					],
+					borderWidth: 1,
+				},
+			],
+		},
+		options: {
+			responsive: true,
+			plugins: {
+				legend: {
+					position: "top",
+				},
+				title: {
+					display: true,
+					text: "Proporção de Transações",
+				},
+			},
+		},
+	});
+
+	// Finalmente, troca para a view de detalhes
+	switchView("#individual-view");
+}
 
 /**
  * Renderiza o gráfico de barras com as 3 operadoras do topo.
@@ -25,7 +109,7 @@ function displayTop3Chart(top3Data) {
 	}
 
 	// Cria a nova instância do gráfico
-	chartInstance = new chartInstance(ctx, {
+	chartInstance = new Chart(ctx, {
 		type: "bar", // Gráfico de barras
 		data: {
 			labels: labels,
@@ -115,6 +199,16 @@ function updatePaginationControls() {
 }
 
 // Event Listeners para os botões de paginação
+
+$(document).on("click", ".view-details-btn", function () {
+	const operatorId = $(this).data("operator-id");
+	displayIndividualMetrics(operatorId);
+});
+
+$(document).on("click", "#back-to-ranking", function () {
+	switchView("#ranking-view");
+});
+
 $(document).on("click", "#prev-page-btn", function () {
 	if (currentPage > 1) {
 		currentPage--;
@@ -131,23 +225,23 @@ $(document).on("click", "#next-page-btn", function () {
 });
 
 /**
- * Ponto de entrada principal: agora também renderiza o gráfico.
+ * Ponto de entrada principal: recebe todos os dados, reseta o estado e renderiza a primeira página.
  * @param {Array} rankedData - O array de operadoras processado e ordenado.
  */
 export function displayRanking(rankedData) {
 	if (!rankedData || rankedData.length === 0) {
-		// ...
+		$("#ranking-body").html(
+			'<tr><td colspan="6" class="text-center">Nenhum dado para exibir.</td></tr>'
+		);
 		return;
 	}
 
 	fullRankedData = rankedData;
-	currentPage = 1;
+	currentPage = 1; // Reseta para a primeira página a cada novo carregamento
 
 	// --- Chama a função para criar o gráfico ---
-	// Pega as 3 primeiras operadoras do ranking completo
 	const top3 = fullRankedData.slice(0, 3);
 	displayTop3Chart(top3);
 
-	// Renderiza a primeira página da tabela
 	renderTablePage();
 }
