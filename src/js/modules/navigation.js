@@ -6,7 +6,7 @@ import { switchView } from "./utils.js";
  */
 
 export function initNavigation(crudManager) {
-	const $navLinks = $(".sidebar-nav .nav-link");
+	const $navLinks = $(".sidebar .sidebar-nav  .nav-link");
 
 	// Gerencia a navegação entre as seções
 	function setActiveLink(clickedLink) {
