@@ -10,10 +10,10 @@
 
 export function processAndRankData({ operators, pixData, debitData }) {
 	const pixMap = new Map(
-		pixData.map((item) => [item.numero_operadora, item.transacoes_pix])
+		pixData.map((item) => [item.Operador, item.QuantidadePix])
 	);
 	const debitMap = new Map(
-		debitData.map((item) => [item.numero_operadora, item.transacoes_debito])
+		debitData.map((item) => [item.Operador, item.QuantidadeDebito])
 	);
 
 	// Alimentar os dados das operadoras com as transações e cálculos
@@ -21,6 +21,7 @@ export function processAndRankData({ operators, pixData, debitData }) {
 		const pixCount = pixMap.get(op.numero_operadora) || 0;
 		const debitCount = debitMap.get(op.numero_operadora) || 0;
 		const totalTransactions = pixCount + debitCount;
+		
 
 		return {
 			...op,
