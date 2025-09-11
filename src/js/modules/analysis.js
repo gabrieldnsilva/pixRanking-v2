@@ -9,10 +9,10 @@
  */
 
 export function processAndRankData({ operators, pixData, debitData }) {
-	const pixMax = new Map(
+	const pixMap = new Map(
 		pixData.map((item) => [item.numero_operadora, item.transacoes_pix])
 	);
-	const debitMax = new Map(
+	const debitMap = new Map(
 		debitData.map((item) => [item.numero_operadora, item.transacoes_debito])
 	);
 
