@@ -124,6 +124,13 @@ body {
 	margin-bottom: 1.5rem;
 }
 
+.main-header h1 {
+	font-size: 2rem;
+	font-weight: 700;
+	margin: 0;
+	color: #111827;
+}
+
 .main-header .btn {
 	color: aliceblue;
 	font-size: 1.5rem;
