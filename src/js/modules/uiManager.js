@@ -6,6 +6,62 @@
 let currentPage = 1;
 const ROWS_PER_PAGE = 10;
 let fullRankedData = []; // Armazena todos os dados para paginação
+let chartInstance = null; // Instância do gráfico
+
+/**
+ * Renderiza o gráfico de barras com as 3 operadoras do topo.
+ * @param {Array} top3Data - Array com os dados das 3 operadoras do topo.
+ */
+function displayTop3Chart(top3Data) {
+	const ctx = document.getElementById("top3-chart").getContext("2d");
+
+	// Extrai os nomes e os valores para os eixos do gráfico
+	const labels = top3Data.map((op) => op.nome_operadora);
+	const data = top3Data.map((op) => op.pixTransactions);
+
+	// Destrói qualquer instância anterior do gráfico
+	if (chartInstance) {
+		chartInstance.destroy();
+	}
+
+	// Cria a nova instância do gráfico
+	chartInstance = new chartInstance(ctx, {
+		type: "bar", // Gráfico de barras
+		data: {
+			labels: labels,
+			datasets: [
+				{
+					label: "Transações Pix",
+					data: data,
+					backgroundColor: [
+						"rgba(75, 192, 192, 0.6)",
+						"rgba(54, 162, 235, 0.6)",
+						"rgba(255, 206, 86, 0.6)",
+					],
+					borderColor: [
+						"rgba(75, 192, 192, 1)",
+						"rgba(54, 162, 235, 1)",
+						"rgba(255, 206, 86, 1)",
+					],
+					borderWidth: 1,
+				},
+			],
+		},
+		options: {
+			scales: {
+				y: {
+					beginAtZero: true,
+				},
+			},
+			responsive: true,
+			plugins: {
+				legend: {
+					display: false,
+				},
+			},
+		},
+	});
+}
 
 /**
  * Renderiza uma página específica da tabela do ranking.
@@ -75,18 +131,23 @@ $(document).on("click", "#next-page-btn", function () {
 });
 
 /**
- * Ponto de entrada principal: recebe todos os dados, reseta o estado e renderiza a primeira página.
+ * Ponto de entrada principal: agora também renderiza o gráfico.
  * @param {Array} rankedData - O array de operadoras processado e ordenado.
  */
 export function displayRanking(rankedData) {
 	if (!rankedData || rankedData.length === 0) {
-		$("#ranking-body").html(
-			'<tr><td colspan="6" class="text-center">Nenhum dado para exibir.</td></tr>'
-		);
+		// ...
 		return;
 	}
 
 	fullRankedData = rankedData;
-	currentPage = 1; // Reseta para a primeira página a cada novo carregamento
+	currentPage = 1;
+
+	// --- Chama a função para criar o gráfico ---
+	// Pega as 3 primeiras operadoras do ranking completo
+	const top3 = fullRankedData.slice(0, 3);
+	displayTop3Chart(top3);
+
+	// Renderiza a primeira página da tabela
 	renderTablePage();
 }
