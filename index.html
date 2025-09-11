@@ -97,7 +97,7 @@
 						id="sidebar-toggle"
 						title="Recolher Menu"
 					>
-						<i class="ri-arrow-left-s-line"></i>
+						<i class="ri-menu-fold-line"></i>
 					</button>
 				</div>
 			</aside>
@@ -137,9 +137,34 @@
 										<tbody id="ranking-body"></tbody>
 									</table>
 								</div>
+								<nav
+									class="d-flex justify-content-end align-items-center mt-3"
+								>
+									<span
+										id="page-info"
+										class="me-3 text-muted"
+									></span>
+									<div class="btn-group">
+										<button
+											id="prev-page-btn"
+											class="btn btn-outline-secondary"
+										>
+											<i class="ri-arrow-left-s-line"></i
+											>Anterior
+										</button>
+										<button
+											id="next-page-btn"
+											class="btn btn-outline-secondary"
+										>
+											Próximo
+											<i class="ri-arrow-right-s-line">
+											</i>
+										</button>
+									</div>
+								</nav>
 								<button
 									id="export-ranking-btn"
-									class="btn btn-primary"
+									class="btn btn-primary mt-3"
 									disabled
 								>
 									<i class="ri-file-pdf-2-fill"></i> Exportar

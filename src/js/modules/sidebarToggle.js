@@ -15,13 +15,13 @@ export function initSidebarToggle() {
 
 			if ($body.hasClass("sidebar-collapsed")) {
 				$icon
-					.removeClass("ri-arrow-left-s-line")
-					.addClass("ri-arrow-right-s-line");
+					.removeClass("ri-menu-fold-line")
+					.addClass("ri-menu-unfold-line");
 				$(this).attr("title", "Expandir Menu");
 			} else {
 				$icon
-					.removeClass("ri-arrow-right-s-line")
-					.addClass("ri-arrow-left-s-line");
+					.removeClass("ri-menu-unfold-line")
+					.addClass("ri-menu-fold-line");
 				$(this).attr("title", "Recolher Menu");
 			}
 		});

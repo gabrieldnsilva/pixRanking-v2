@@ -2,24 +2,26 @@
  * Módulo para manipular a interface do usuário (DOM).
  */
 
+// Estado da paginação
+let currentPage = 1;
+const ROWS_PER_PAGE = 10;
+let fullRankedData = []; // Armazena todos os dados para paginação
+
 /**
- * Limpa a tabela e exibe os novos dados do ranking.
- * @param {Array} rankedData - O array de operadoras proessado e ordenado.
+ * Renderiza uma página específica da tabela do ranking.
  */
-
-export function displayRanking(rankedData) {
+function renderTablePage() {
 	const $rankingBody = $("#ranking-body");
-	$rankingBody.empty(); // Limpa quaisquer dados antigos da tabela
+	$rankingBody.empty();
 
-	if (!rankedData || rankedData.length === 0) {
-		const emptyRow = `<tr><td colspan="6" class="text-center">Nenhum dado para exibir. Carregue os arquivos.</td></tr>`;
-		$rankingBody.html(emptyRow);
-		return;
-	}
+	// Calcula os índices de início e fim para o .slice()
+	const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
+	const endIndex = startIndex + ROWS_PER_PAGE;
+	const paginatedData = fullRankedData.slice(startIndex, endIndex);
 
-	rankedData.forEach((operator, index) => {
-		const rank = index + 1;
-
+	paginatedData.forEach((operator, index) => {
+		// O rank deve ser calculado com base na página atual
+		const rank = startIndex + index + 1;
 		const pixPercentage = (operator.pixProportion * 100).toFixed(2) + "%";
 
 		const row = `
@@ -40,4 +42,51 @@ export function displayRanking(rankedData) {
         `;
 		$rankingBody.append(row);
 	});
+
+	updatePaginationControls();
+}
+
+/**
+ * Atualiza os botões e as informações da página.
+ */
+function updatePaginationControls() {
+	const totalPages = Math.ceil(fullRankedData.length / ROWS_PER_PAGE);
+	$("#page-info").text(`Página ${currentPage} de ${totalPages}`);
+
+	// Desabilita/habilita os botões conforme a página atual
+	$("#prev-page-btn").prop("disabled", currentPage === 1);
+	$("#next-page-btn").prop("disabled", currentPage === totalPages);
+}
+
+// Event Listeners para os botões de paginação
+$(document).on("click", "#prev-page-btn", function () {
+	if (currentPage > 1) {
+		currentPage--;
+		renderTablePage();
+	}
+});
+
+$(document).on("click", "#next-page-btn", function () {
+	const totalPages = Math.ceil(fullRankedData.length / ROWS_PER_PAGE);
+	if (currentPage < totalPages) {
+		currentPage++;
+		renderTablePage();
+	}
+});
+
+/**
+ * Ponto de entrada principal: recebe todos os dados, reseta o estado e renderiza a primeira página.
+ * @param {Array} rankedData - O array de operadoras processado e ordenado.
+ */
+export function displayRanking(rankedData) {
+	if (!rankedData || rankedData.length === 0) {
+		$("#ranking-body").html(
+			'<tr><td colspan="6" class="text-center">Nenhum dado para exibir.</td></tr>'
+		);
+		return;
+	}
+
+	fullRankedData = rankedData;
+	currentPage = 1; // Reseta para a primeira página a cada novo carregamento
+	renderTablePage();
 }
