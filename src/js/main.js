@@ -59,6 +59,10 @@ $(document).ready(function () {
 
 				// Feedback sutil de dados carregados
 				showSuccessToast("Operadores carregados");
+
+				if (isStatusModalOpen) {
+					updateUploadStatus("operators");
+				}
 				checkAndProcessData();
 
 				// Atualiza a UI para refletir o carregamento
@@ -83,7 +87,6 @@ $(document).ready(function () {
 	 * @param {string} selector - O seletor jQuery para o input de arquivo (ex: '#json-upload').
 	 * @param {function} readerFunction - A função que lerá o arquivo (ex: readJsonFile).
 	 * @param {string} dataKey - A chave para salvar os dados em `appData` (ex: 'operators').
-	 * @param {string} logMessage - A mensagem para exibir no console após o sucesso.
 	 */
 	function setupFileUploadListener(selector, readerFunction, dataKey) {
 		$(selector).on("change", function (event) {
@@ -92,7 +95,12 @@ $(document).ready(function () {
 
 			// Se for o primeiro upload manual, mostra o modal de status
 			if (!isStatusModalOpen) {
-				showUploadStatus();
+				const currentStatus = {
+					operators: !!appData.operators,
+					pixData: !!appData.pixData,
+					debitData: !!appData.debitData,
+				};
+				showUploadStatus(currentStatus);
 				isStatusModalOpen = true;
 			}
 
@@ -108,7 +116,10 @@ $(document).ready(function () {
 					showErrorAlert(
 						`Ocorreu um erro ao carregar o arquivo: ${error}`
 					);
-					isStatusModalOpen = false; // Reseta em caso de erro
+					if (isStatusModalOpen) {
+						Swal.close(); // Fecha o modal de status em caso de erro
+						isStatusModalOpen = false;
+					}
 				});
 		});
 	}

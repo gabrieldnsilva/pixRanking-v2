@@ -35,23 +35,39 @@ export function showSuccessToast(title) {
 
 /**
  * Exibe um modal de status do upload que pode ser atualizado
+ * @param {object} initialStatus - O estado inicial dos uploads
  */
 
-export function showUploadStatus() {
+export function showUploadStatus(initialStatus = {}) {
+	// Helper para criar o ícone de status de cada item
+	const getIcon = (isLoaded) => {
+		return isLoaded
+			? '<i class="ri-checkbox-circle-fill" style="color: green;"></i>'
+			: '<i class="ri-loader-4-line"></i>';
+	};
+
 	Swal.fire({
 		title: "Aguardando Arquivos",
 		html: `
             <ul id="upload-status-list" style="list-style-type: none; padding: 0; text-align: left;">
-                <li id="status-operators"><i class="ri-loader-4-line"></i> Operadoras (.json)</li>
-                <li id="status-pixData"><i class="ri-loader-4-line"></i> Transações PIX (.csv)</li>
-                <li id="status-debitData"><i class="ri-loader-4-line"></i> Transações Débito (.csv)</li>
+                <li id="status-operators">${getIcon(
+					initialStatus.operators
+				)} Operadoras (.json)</li>
+                <li id="status-pixData">${getIcon(
+					initialStatus.pixData
+				)} Transações PIX (.csv)</li>
+                <li id="status-debitData">${getIcon(
+					initialStatus.debitData
+				)} Transações Débito (.csv)</li>
             </ul>
+            <p class="mt-3">Por favor, carregue os arquivos restantes.</p>
         `,
-		allowOutsideClick: false,
+		allowOutsideClick: true, // Impede que o modal seja fechado clicando fora
+		allowEscapeKey: false, // Impede que a tecla "Esc" feche o modal
 		showConfirmButton: false,
-		willOpen: () => {
-			Swal.showLoading();
-		},
+		timerProgressBar: true,
+		timer: 3000, // Fecha automaticamente após 60 segundos
+		willOpen: () => {},
 	});
 }
 
@@ -62,7 +78,10 @@ export function showUploadStatus() {
 export function updateUploadStatus(fileKey) {
 	const listItem = document.getElementById(`status-${fileKey}`);
 	if (listItem) {
-		listItem.innerHTML = `<i class="ri-checkbox-circle-fill" style="color: green;"></i> ${listItem.innerText}`;
+		// Pega o texto do item (ex: " Operadoras (.json)")
+		const text = listItem.innerText;
+		// Remonta o HTML com o ícone de sucesso
+		listItem.innerHTML = `<i class="ri-checkbox-circle-fill" style="color: green;"></i>${text}`;
 	}
 }
 
