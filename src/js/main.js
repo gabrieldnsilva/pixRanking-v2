@@ -7,6 +7,13 @@ import { displayRanking } from "./modules/uiManager.js";
 import { initSidebarToggle } from "./modules/sidebarToggle.js";
 import { initCrud } from "./modules/crudManager.js";
 import { initNavigation } from "./modules/navigation.js";
+import {
+	showErrorAlert,
+	showSuccessToast,
+	showUploadStatus,
+	updateUploadStatus,
+	closeUploadStatusAndShowSuccess,
+} from "./modules/feedbackManager.js";
 
 $(document).ready(function () {
 	// --- Estado Central da Aplicação ---
@@ -16,6 +23,9 @@ $(document).ready(function () {
 		debitData: null,
 	};
 
+	// Variável para controlar o modal de operadores
+	let isStatusModalOpen = false;
+
 	// --- Instâncias de Componentes da UI ---
 	const operatorModal = new bootstrap.Modal($("#operator-modal"));
 
@@ -24,19 +34,15 @@ $(document).ready(function () {
 	// Checa se todos os dados foram carregados
 	function checkAndProcessData() {
 		if (appData.operators && appData.pixData && appData.debitData) {
-			console.log("Todos os dados carregados. Processando...");
-			try {
-				const rankedData = processAndRankData(appData);
-				displayRanking(rankedData);
+			const rankedData = processAndRankData(appData);
+			displayRanking(rankedData);
 
-				// Habilita agora o botão de exportação
-				$("#export-ranking-btn").prop("disabled", false);
-			} catch (error) {
-				console.error("Erro ao processar os dados:", error);
-				alert(
-					"Ocorreu um erro ao processar os dados. Verifique o console para mais detalhes."
-				);
-			}
+			// Habilita agora o botão de exportação
+			$("#export-ranking-btn").prop("disabled", false);
+
+			// Fecha o modal de status e mostra sucesso
+			closeUploadStatusAndShowSuccess();
+			isStatusModalOpen = false;
 		}
 	}
 
@@ -50,13 +56,19 @@ $(document).ready(function () {
 			.done(function (data) {
 				// Se bem-sucedido
 				appData.operators = data;
-				console.log("Operadoras carregadas do JSON inicial:", data);
+
+				// Feedback sutil de dados carregados
+				showSuccessToast("Operadores carregados");
+				checkAndProcessData();
+
 				// Atualiza a UI para refletir o carregamento
 				const $label = $("label[for='json-upload'] span");
-				$label.text("Operadoras carregadas");
+				$label.text("Operadores Carregados");
 				$label.parent().addClass("loaded");
-
-				checkAndProcessData();
+				$label
+					.siblings("i")
+					.removeClass("ri-database-2-line")
+					.addClass("ri-database-2-fill");
 			})
 			.fail(function () {
 				// Falha. Provavelmente o arquivo não existe.
@@ -78,18 +90,25 @@ $(document).ready(function () {
 			const file = event.target.files[0];
 			if (!file) return;
 
+			// Se for o primeiro upload manual, mostra o modal de status
+			if (!isStatusModalOpen) {
+				showUploadStatus();
+				isStatusModalOpen = true;
+			}
+
 			readerFunction(file)
 				.then((data) => {
-					console.log("Dados do CSV de PIX:", data);
-					appData[dataKey] = data; // Usamos a chave dinâmica para salvar os dados
+					appData[dataKey] = data;
+					// Atualiza o item específico na lista de status
+					updateUploadStatus(dataKey);
 					checkAndProcessData();
 				})
 				.catch((error) => {
-					console.error(
-						`Erro ao carregar o arquivo para ${selector}:`,
-						error
+					// Usa o novo alerta de erro
+					showErrorAlert(
+						`Ocorreu um erro ao carregar o arquivo: ${error}`
 					);
-					alert(`Ocorreu um erro ao carregar o arquivo: ${error}`);
+					isStatusModalOpen = false; // Reseta em caso de erro
 				});
 		});
 	}
