@@ -1,0 +1,20 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+/* Estilos para os gráficos Chart.js */
+#top3-chart,
+#top3-proportion-chart,
+#metrics-chart {
+	width: auto !important;
+	height: 250px !important; /* Aumentado para desktop */
+	max-width: 100%;
+}
+
+/* Media query para telas menores */
+@media (max-width: 768px) {
+	#top3-chart,
+	#top3-proportion-chart,
+	#metrics-chart {
+		width: 300px !important;
+		height: 200px !important; /* Mantém menor em mobile */
+	}
+}

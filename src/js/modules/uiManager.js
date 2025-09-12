@@ -118,9 +118,9 @@ function displayTop3Chart(top3Data) {
 					label: "Transações Pix",
 					data: data,
 					backgroundColor: [
-						"rgba(75, 192, 192, 0.6)",
-						"rgba(54, 162, 235, 0.6)",
-						"rgba(255, 206, 86, 0.6)",
+						"rgb(75, 192, 192)",
+						"rgb(54, 162, 235)",
+						"rgb(255, 206, 86)",
 					],
 					borderColor: [
 						"rgba(75, 192, 192, 1)",
@@ -138,6 +138,68 @@ function displayTop3Chart(top3Data) {
 				},
 			},
 			responsive: true,
+			maintainAspectRatio: false,
+			plugins: {
+				legend: {
+					display: false,
+				},
+			},
+		},
+	});
+}
+
+/**
+ * Renderiza o gráfico de barras com as 3 operadoras do topo por proporção PIX.
+ * @param {Array} top3ProportionData - Array com os dados das 3 operadoras do topo por proporção.
+ */
+function displayTop3ProportionChart(top3ProportionData) {
+	const ctx = document
+		.getElementById("top3-proportion-chart")
+		.getContext("2d");
+
+	// Extrai os nomes e os valores para os eixos do gráfico
+	const labels = top3ProportionData.map((op) => op.nome_operadora);
+	const data = top3ProportionData.map((op) =>
+		(op.pixProportion * 100).toFixed(2)
+	); // Proporção em %
+
+	// Destrói qualquer instância anterior do gráfico
+	if (window.proportionChartInstance) {
+		window.proportionChartInstance.destroy();
+	}
+
+	// Cria a nova instância do gráfico
+	window.proportionChartInstance = new Chart(ctx, {
+		type: "bar",
+		data: {
+			labels: labels,
+			datasets: [
+				{
+					label: "Proporção PIX (%)",
+					data: data,
+					backgroundColor: [
+						"rgb(255, 99, 132)", // Cor sólida diferente para distinguir
+						"rgb(54, 162, 235)",
+						"rgb(255, 206, 86)",
+					],
+					borderColor: [
+						"rgb(255, 99, 132)",
+						"rgb(54, 162, 235)",
+						"rgb(255, 206, 86)",
+					],
+					borderWidth: 1,
+				},
+			],
+		},
+		options: {
+			scales: {
+				y: {
+					beginAtZero: true,
+					max: 100, // Máximo 100% para proporção
+				},
+			},
+			responsive: true,
+			maintainAspectRatio: false,
 			plugins: {
 				legend: {
 					display: false,
@@ -239,9 +301,15 @@ export function displayRanking(rankedData) {
 	fullRankedData = rankedData;
 	currentPage = 1; // Reseta para a primeira página a cada novo carregamento
 
-	// --- Chama a função para criar o gráfico ---
+	// --- Gráfico TOP 3 por Transações PIX ---
 	const top3 = fullRankedData.slice(0, 3);
 	displayTop3Chart(top3);
+
+	// --- Novo: Gráfico TOP 3 por Proporção PIX ---
+	const top3Proportion = [...fullRankedData]
+		.sort((a, b) => b.pixProportion - a.pixProportion)
+		.slice(0, 3);
+	displayTop3ProportionChart(top3Proportion);
 
 	renderTablePage();
 }
