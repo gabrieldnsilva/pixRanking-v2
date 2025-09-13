@@ -124,9 +124,9 @@ function displayTop3Chart(top3Data) {
 						"rgb(255, 206, 86)",
 					],
 					borderColor: [
-						"rgba(75, 192, 192, 1)",
-						"rgba(54, 162, 235, 1)",
-						"rgba(255, 206, 86, 1)",
+						"rgba(75, 192, 192)",
+						"rgba(54, 162, 235)",
+						"rgba(255, 206, 86)",
 					],
 					borderWidth: 1,
 				},

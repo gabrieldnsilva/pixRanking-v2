@@ -38,7 +38,7 @@ $(document).ready(function () {
 			displayRanking(rankedData);
 
 			// Habilita agora o botão de exportação
-			$("#export-ranking-btn").prop("disabled", false);
+			$("#export-ranking-pdf").prop("disabled", false);
 
 			// Fecha o modal de status e mostra sucesso
 			closeUploadStatusAndShowSuccess();

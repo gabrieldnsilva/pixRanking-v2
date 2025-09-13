@@ -3,9 +3,6 @@
  * Usa as bibliotecas jsPDF e html2canvas.
  */
 
-// Desestruturação das bibliotecas necessárias
-const { jsPDF } = window.jspdf;
-
 /**
  * Adicionar um cabeçalho a rodapé padrão ao documento PDF.
  * @ {jsPDF} doc = A instância do jsPDF.
@@ -42,36 +39,40 @@ function addHeaderAndFooter(doc) {
  * Exporta a visão principal do ranking para um arquivo PDF.
  */
 export function exportRankingPDF() {
-	// Seleciona os elementos que serão capturados
-	const rankingCard = document.querySelector("ranking-view .card-body");
-	const chartCanvas = document.querySelector("#top-3-chart");
+	const rankingCard = document.querySelector("#ranking-view .card-body");
 
-	// Mostra um feedback para o usuário
 	Swal.fire({
 		title: "Gerando PDF...",
-		text: "Por favor, aguarde enquanto o relatório é gerado.",
+		text: "Por favor, aguarde enquanto o relatório é criado.",
 		allowOutsideClick: false,
 		didOpen: () => {
 			Swal.showLoading();
 		},
 	});
 
-	html2canvas(rankingCard, { scale: 2 }).then((canvas) => {
-		const doc = new jsPDF({
+	// Usa window.html2canvas para garantir que estamos pegando a biblioteca global
+	window.html2canvas(rankingCard, { scale: 1.5 }).then((canvas) => {
+		// CORREÇÃO: A forma correta de instanciar o jsPDF quando carregado via script
+		const doc = new window.jspdf.jsPDF({
 			orientation: "p",
 			unit: "mm",
 			format: "a4",
 		});
 
-		const imgData = canvas.toDataURL("image/png");
+		const imgData = canvas.toDataURL("image/jpeg, 0.9");
 		const imgProps = doc.getImageProperties(imgData);
 		const pdfWidth = doc.internal.pageSize.getWidth();
 		const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-		doc.addImage(imgData, "PNG", 0, 20, pdfWidth, pdfHeight);
+		// Limita a altura da imagem para não ultrapassar a página
+		const pageHeightLimit = doc.internal.pageSize.getHeight() - 30; // Subtrai margens
+		const finalHeight =
+			pdfHeight > pageHeightLimit ? pageHeightLimit : pdfHeight;
+
+		doc.addImage(imgData, "JPEG", 0, 20, pdfWidth, finalHeight);
 
 		addHeaderAndFooter(doc);
-		doc.save("relatorio_ranking_pix.pdf");
+		doc.save("ranking_operadoras.pdf");
 
 		Swal.close();
 	});
@@ -95,22 +96,28 @@ export function exportIndividualReportPDF() {
 		},
 	});
 
-	html2canvas(reportCard, { scale: 2 }).then((canvas) => {
-		const doc = new jsPDF({
+	window.html2canvas(reportCard, { scale: 1.5 }).then((canvas) => {
+		// CORREÇÃO: A forma correta de instanciar o jsPDF
+		const doc = new window.jspdf.jsPDF({
 			orientation: "p",
 			unit: "mm",
 			format: "a4",
 		});
 
-		const imgData = canvas.toDataURL("image/png");
+		const imgData = canvas.toDataURL("image/jpeg, 0.9");
 		const imgProps = doc.getImageProperties(imgData);
 		const pdfWidth = doc.internal.pageSize.getWidth();
 		const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+		const pageHeightLimit = doc.internal.pageSize.getHeight() - 30;
+		const finalHeight =
+			pdfHeight > pageHeightLimit ? pageHeightLimit : pdfHeight;
 
-		doc.addImage(imgData, "PNG", 0, 20, pdfWidth, pdfHeight);
+		doc.addImage(imgData, "JPEG", 0, 20, pdfWidth, finalHeight);
 
 		addHeaderAndFooter(doc);
-		doc.save(`relatorio_${operatorName.replace("Métricas de: ", "")}.pdf`);
+		doc.save(
+			`relatorio_${operatorName.replace("Métricas de: ", "").trim()}.pdf`
+		);
 
 		Swal.close();
 	});
