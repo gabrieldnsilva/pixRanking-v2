@@ -1,4 +1,5 @@
 import { switchView } from "./utils.js";
+import { exportRankingPDF, exportIndividualReportPDF } from "./pdfGenerator.js";
 
 /**
  * Módulo para manipular a interface do usuário (DOM).
@@ -284,6 +285,16 @@ $(document).on("click", "#next-page-btn", function () {
 		currentPage++;
 		renderTablePage();
 	}
+});
+
+// Listener para o botão de exportar o ranking geral
+$(document).on("click", "#export-ranking-pdf", function () {
+	exportRankingPDF();
+});
+
+// Listener para o botão de exportar o relatório individual
+$(document).on("click", "#export-individual-pdf", function () {
+	exportIndividualReportPDF();
 });
 
 /**
