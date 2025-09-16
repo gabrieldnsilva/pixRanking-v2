@@ -157,7 +157,7 @@ export function exportRankingPDF_Native(rankedData) {
 
 	// 4. Adiciona legendas para os gráficos
 	doc.setFontSize(12);
-	doc.text("Análise Gráfica - TOP 3 Operadoras", 14, 32);
+	doc.text("Análise Gráfica - TOP 3 Operadoras", 14, 32), { align: "center" };
 
 	// 5. Captura e adiciona os gráficos lado a lado
 	const chartCanvas1 = document.getElementById("top3-chart");
@@ -165,8 +165,8 @@ export function exportRankingPDF_Native(rankedData) {
 
 	if (chartCanvas1 && chartCanvas2) {
 		// Pega a imagem do gráfico em alta qualidade
-		const chartImage1 = chartCanvas1.toDataURL("image/png", 0.9); // Reduz um pouco a qualidade
-		const chartImage2 = chartCanvas2.toDataURL("image/png", 0.9);
+		const chartImage1 = chartCanvas1.toDataURL("image/png", 1);
+		const chartImage2 = chartCanvas2.toDataURL("image/png", 1);
 
 		const chartWidth = 88.5;
 		const chartHeight = 60;
@@ -174,7 +174,6 @@ export function exportRankingPDF_Native(rankedData) {
 
 		// Adiciona Legenda e gráfico 1 (Transações PIX)
 		doc.setFontSize(10);
-		doc.text("Top 3 - Transações PIX", 14, startYCharts - 2);
 		doc.addImage(
 			chartImage1,
 			"PNG",
@@ -184,11 +183,6 @@ export function exportRankingPDF_Native(rankedData) {
 			chartHeight
 		);
 		// Adiciona legenda e gráfico 2 (Proporção PIX) ao lado
-		doc.text(
-			"Top 3 - Proporção PIX",
-			14 + chartWidth + 5,
-			startYCharts - 2
-		);
 		doc.addImage(
 			chartImage2,
 			"PNG",

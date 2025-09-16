@@ -113,7 +113,11 @@ function displayTop3Chart(top3Data) {
 		chartInstance.destroy();
 	}
 
+	let delayed;
+
 	// Cria a nova instância do gráfico
+	Chart.defaults.font.size = 14;
+	Chart.defaults.font.weight = "bold";
 	chartInstance = new Chart(ctx, {
 		type: "bar", // Gráfico de barras
 		data: {
@@ -142,11 +146,29 @@ function displayTop3Chart(top3Data) {
 					beginAtZero: true,
 				},
 			},
+			animation: {
+				onComplete: () => {
+					delayed = true;
+				},
+				delay: (context) => {
+					let delay = 0;
+					if (
+						context.type === "data" &&
+						context.mode === "default" &&
+						!delayed
+					) {
+						delay =
+							context.dataIndex * 300 +
+							context.datasetIndex * 100;
+					}
+					return delay;
+				},
+			},
 			responsive: true,
 			maintainAspectRatio: false,
 			plugins: {
 				legend: {
-					display: false,
+					display: true,
 				},
 			},
 		},
@@ -207,7 +229,7 @@ function displayTop3ProportionChart(top3ProportionData) {
 			maintainAspectRatio: false,
 			plugins: {
 				legend: {
-					display: false,
+					display: true,
 				},
 			},
 		},
