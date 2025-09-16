@@ -1,5 +1,9 @@
 import { switchView } from "./utils.js";
-import { exportRankingPDF, exportIndividualReportPDF } from "./pdfGenerator.js";
+import {
+	exportRankingPDF,
+	exportIndividualReportPDF,
+	exportRankingPDF_Native,
+} from "./pdfGenerator.js";
 
 /**
  * Módulo para manipular a interface do usuário (DOM).
@@ -287,9 +291,19 @@ $(document).on("click", "#next-page-btn", function () {
 	}
 });
 
-// Listener para o botão de exportar o ranking geral
+/**  Listener para o botão de exportar o ranking geral
 $(document).on("click", "#export-ranking-pdf", function () {
 	exportRankingPDF();
+});
+*/
+
+$(document).on("click", "#export-ranking-pdf", function () {
+	// A variável 'fullRankedData' já contém todos os dados que precisamos
+	if (fullRankedData && fullRankedData.length > 0) {
+		exportRankingPDF_Native(fullRankedData);
+	} else {
+		alert("Não há dados para exportar.");
+	}
 });
 
 // Listener para o botão de exportar o relatório individual

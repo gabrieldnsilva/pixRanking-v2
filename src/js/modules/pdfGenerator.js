@@ -122,3 +122,127 @@ export function exportIndividualReportPDF() {
 		Swal.close();
 	});
 }
+
+/**
+ * TÉCNICA AVANÇADA: Exporta o ranking gerando um PDF nativo com texto e tabelas vetoriais.
+ * Requer o plugin jspdf-autotable.
+ * @param {Array} rankedData - O array completo com os dados do ranking.
+ */
+export function exportRankingPDF_Native(rankedData) {
+	// 1. Feedback inicial para o usuário
+	Swal.fire({
+		title: "Gerando PDF...",
+		allowOutsideClick: false,
+		didOpen: () => {
+			Swal.showLoading();
+		},
+	});
+
+	// 2. Cria uma nova instância do jsPDF
+	const doc = new window.jspdf.jsPDF({
+		orientation: "p",
+		unit: "mm",
+		format: "a4",
+	});
+
+	// 3. Adiciona o Título Principal
+	doc.setFontSize(18);
+	doc.setTextColor(40);
+	doc.text(
+		"Ranking de Performance de Operadoras",
+		doc.internal.pageSize.getWidth() / 2,
+		22,
+		{ align: "center" }
+	);
+
+	// 4. Adiciona legendas para os gráficos
+	doc.setFontSize(12);
+	doc.text("Análise Gráfica - TOP 3 Operadoras", 14, 32);
+
+	// 5. Captura e adiciona os gráficos lado a lado
+	const chartCanvas1 = document.getElementById("top3-chart");
+	const chartCanvas2 = document.querySelector("#top3-proportion-chart");
+
+	if (chartCanvas1 && chartCanvas2) {
+		// Pega a imagem do gráfico em alta qualidade
+		const chartImage1 = chartCanvas1.toDataURL("image/png", 0.9); // Reduz um pouco a qualidade
+		const chartImage2 = chartCanvas2.toDataURL("image/png", 0.9);
+
+		const chartWidth = 88.5;
+		const chartHeight = 60;
+		const startYCharts = 42;
+
+		// Adiciona Legenda e gráfico 1 (Transações PIX)
+		doc.setFontSize(10);
+		doc.text("Top 3 - Transações PIX", 14, startYCharts - 2);
+		doc.addImage(
+			chartImage1,
+			"PNG",
+			14,
+			startYCharts,
+			chartWidth,
+			chartHeight
+		);
+		// Adiciona legenda e gráfico 2 (Proporção PIX) ao lado
+		doc.text(
+			"Top 3 - Proporção PIX",
+			14 + chartWidth + 5,
+			startYCharts - 2
+		);
+		doc.addImage(
+			chartImage2,
+			"PNG",
+			14 + chartWidth + 5,
+			startYCharts,
+			chartWidth,
+			chartHeight
+		);
+
+		// 6. Gera a tabela TOP 20
+		doc.setFontSize(12);
+		const startYTableTitle = startYCharts + chartHeight + 12; // Posição Y abaixo dos gráficos
+		doc.text("Top 20 Operadoras - Ranking PIX", 14, startYTableTitle);
+
+		// Filtra para pegar apenas os 20 primeiros
+		const top20Data = rankedData.slice(0, 20);
+
+		const head = [["Pos.", "Operadora", "Nº", "Trans. PIX", "Prop. PIX"]];
+		const body = top20Data.map((op, i) => [
+			i + 1,
+			op.nome_operadora,
+			op.numero_operadora,
+			op.pixTransactions.toLocaleString("pt-BR"),
+			`${(op.pixProportion * 100).toFixed(2)}%`,
+		]);
+
+		// Verifica se autoTable está disponível
+		if (typeof doc.autoTable === "function") {
+			doc.autoTable({
+				head: head,
+				body: body,
+				startY: startYTableTitle + 4,
+				theme: "grid",
+				styles: { fontSize: 8, cellPadding: 1.5 },
+				headStyles: {
+					fillColor: [41, 128, 185],
+					textColor: 255,
+					fontStyle: "bold",
+				},
+			});
+		} else {
+			console.error(
+				"autoTable não está disponível. Verifique o carregamento do plugin."
+			);
+		}
+
+		// 7. Adiciona cabeçalho e rodapé
+		addHeaderAndFooter(doc);
+
+		// 8. Salva o arquivo
+		doc.save("ranking_top20_operadoras.pdf");
+		Swal.close();
+	} else {
+		console.error("Gráficos não encontrados no DOM.");
+		Swal.fire("Erro", "Gráficos não puderam ser capturados.", "error");
+	}
+}
