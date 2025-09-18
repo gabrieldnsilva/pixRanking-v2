@@ -88,7 +88,12 @@ $(document).ready(function () {
 	 * @param {function} readerFunction - A função que lerá o arquivo (ex: readJsonFile).
 	 * @param {string} dataKey - A chave para salvar os dados em `appData` (ex: 'operators').
 	 */
-	function setupFileUploadListener(selector, readerFunction, dataKey) {
+	function setupFileUploadListener(
+		selector,
+		readerFunction,
+		dataKey,
+		columnMap = null
+	) {
 		$(selector).on("change", function (event) {
 			const file = event.target.files[0];
 			if (!file) return;
@@ -104,7 +109,7 @@ $(document).ready(function () {
 				isStatusModalOpen = true;
 			}
 
-			readerFunction(file)
+			readerFunction(file, columnMap)
 				.then((data) => {
 					appData[dataKey] = data;
 					// Atualiza o item específico na lista de status
@@ -133,8 +138,16 @@ $(document).ready(function () {
 
 	// 2. Configura os listeners de upload de arquivos
 	setupFileUploadListener("#json-upload", readJsonFile, "operators");
-	setupFileUploadListener("#pix-upload", readCsvFile, "pixData");
-	setupFileUploadListener("#debit-upload", readCsvFile, "debitData");
+	setupFileUploadListener(
+		"#pix-upload",
+		(file) => readCsvFile(file, "pix"),
+		"pixData"
+	); // Passa 'pix' como tipo
+	setupFileUploadListener(
+		"#debit-upload",
+		(file) => readCsvFile(file, "debit"),
+		"debitData"
+	); // Passa 'debit' como tipo
 
 	// 3. Carrega os dados iniciais
 	loadInitialOperators();
