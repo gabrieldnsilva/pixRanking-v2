@@ -1,20 +1,135 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+/* filepath: \\10.111.88.1\files\portal\ranking-pix\src\css\components\login.css */
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap");
 
-/* Estilos para os gráficos Chart.js */
-#top3-chart,
-#top3-proportion-chart,
-#metrics-chart {
-	width: auto !important;
-	height: 250px !important; /* Aumentado para desktop */
-	max-width: 100%;
+:root {
+	--cor-primaria-verde: #27ae60; /* Green from your theme */
+	--cor-secundaria-laranja: #db7612; /* Orange from your theme */
+	--cor-texto-claro: #ffffff; /* White */
+	--cor-fundo-pagina: #f0f4f8; /* Light background */
+	--cor-texto-escuro: #2c3e50; /* Dark text */
+}
+
+body,
+html {
+	height: 100%;
+	font-family: "Montserrat", sans-serif;
+	background-color: var(--cor-fundo-pagina);
+}
+
+.login-wrapper {
+	display: flex;
+	min-height: 100vh;
+}
+
+/* Coluna da Esquerda (Branding with Image) */
+.branding-section {
+	background: linear-gradient(
+		135deg,
+		var(--cor-primaria-verde) 0%,
+		var(--cor-secundaria-laranja) 100%
+	);
+	color: var(--cor-texto-claro);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 3rem;
+}
+
+.branding-logo {
+	width: 100px; /* Adjust size as needed */
+	height: auto;
+	margin-bottom: 1rem;
+	border-radius: 50%; /* Optional: make it circular */
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.branding-section h1 {
+	font-weight: 700;
+	font-size: 2.5rem;
+	margin-bottom: 1rem;
+}
+
+.branding-section .logo-text {
+	font-size: 1.8rem;
+	font-weight: 500;
+	border: 2px solid var(--cor-texto-claro); /* White border */
+	display: inline-block;
+	padding: 0.5rem 1rem;
+	margin-bottom: 1.5rem;
+	color: var(--cor-texto-claro);
+}
+
+.branding-section p {
+	font-size: 1.1rem;
+	max-width: 400px;
+	margin: 0 auto;
+}
+
+/* Coluna da Direita (Formulário) */
+.form-section {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 2rem;
+	background-color: var(--cor-texto-claro);
+}
+
+.login-form {
+	width: 100%;
+	max-width: 460px;
+}
+
+.login-form .card {
+	border: 1px solid rgba(0, 0, 0, 0.05);
+	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.login-form .card-body {
+	padding: 1.5rem;
+}
+
+.login-form h2 {
+	color: var(--cor-texto-escuro);
+	font-weight: 700;
+}
+
+.btn-login {
+	background: linear-gradient(90deg, var(--cor-secundaria-laranja), #c66a0f);
+	border: none;
+	color: var(--cor-texto-claro);
+	font-weight: 700;
+	padding: 0.75rem 1rem;
+}
+
+.btn-login:hover {
+	background-color: #c66a0f; /* Darker orange */
+	border-color: #c66a0f;
+}
+
+.forgot-password-link {
+	color: var(--cor-primaria-verde);
+	font-size: 0.9rem;
+}
+
+.btn-register {
+	border-color: var(--cor-primaria-verde); /* Green border */
+	color: var(--cor-primaria-verde);
+	font-weight: 700;
+	padding: 0.75rem;
+}
+
+.btn-register {
+	border-color: var(--cor-primaria-verde);
+	color: var(--cor-primaria-verde);
 }
 
 /* Media query para telas menores */
 @media (max-width: 768px) {
-	#top3-chart,
-	#top3-proportion-chart,
-	#metrics-chart {
-		width: 300px !important;
-		height: 200px !important; /* Mantém menor em mobile */
+	.branding-section {
+		display: none;
+	}
+	.login-form {
+		padding: 0 1rem;
 	}
 }
