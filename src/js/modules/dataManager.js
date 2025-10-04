@@ -38,14 +38,33 @@ export function readCsvFile(file, type) {
 				// Renomear dinamicamente a coluna "Quantidade" baseada no tipo
 				const adjustedData = results.data.map((row) => {
 					const newRow = { ...row };
-					if (newRow.Quantidade !== undefined) {
-						if (type === "pix") {
-							newRow.QuantidadePix = newRow.Quantidade;
-						} else if (type === "debit") {
-							newRow.QuantidadeDebito = newRow.Quantidade;
+
+					let quantityValue = null;
+					let foundColumn = null;
+					for (const key in newRow) {
+						if (key.toLowerCase().includes("quantidade")) {
+							quantityValue = newRow[key];
+							foundColumn = key;
+							break; // Usa a primeira correspondência
 						}
-						delete newRow.Quantidade; // Remove a coluna original para evitar confusão
 					}
+
+					// Se encontrou, remove a coluna original e renomeia para o tipo específico
+					if (quantityValue !== null && foundColumn) {
+						delete newRow[foundColumn]; // Remove a coluna original
+						if (type === "pix") {
+							newRow.QuantidadePix = quantityValue;
+						} else if (type === "debit") {
+							newRow.QuantidadeDebito = quantityValue;
+						}
+					} else {
+						// Log de aviso se nenhuma coluna for encontrada
+						console.warn(
+							"Linha sem coluna de quantidade válida:",
+							row
+						);
+					}
+
 					return newRow;
 				});
 				console.log(`CSV ${type} parseado e ajustado:`, adjustedData);
