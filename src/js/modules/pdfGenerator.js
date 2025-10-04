@@ -3,11 +3,17 @@
  * Usa as bibliotecas jsPDF e html2canvas.
  */
 
+import {
+	showErrorAlert,
+	showSuccessAlert,
+	showLoading,
+	closeAlert,
+} from "./feedbackManager.js";
+
 /**
  * Adicionar um cabeçalho a rodapé padrão ao documento PDF.
- * @ {jsPDF} doc = A instância do jsPDF.
+ * @param {jsPDF} doc - A instância do jsPDF.
  */
-
 function addHeaderAndFooter(doc) {
 	const pageCount = doc.internal.getNumberOfPages();
 	const pageWidth = doc.internal.pageSize.getWidth();
@@ -41,41 +47,37 @@ function addHeaderAndFooter(doc) {
 export function exportRankingPDF() {
 	const rankingCard = document.querySelector("#ranking-view .card-body");
 
-	Swal.fire({
-		title: "Gerando PDF...",
-		text: "Por favor, aguarde enquanto o relatório é criado.",
-		allowOutsideClick: false,
-		didOpen: () => {
-			Swal.showLoading();
-		},
-	});
+	showLoading("Gerando PDF...");
 
-	// Usa window.html2canvas para garantir que estamos pegando a biblioteca global
-	window.html2canvas(rankingCard, { scale: 1.5 }).then((canvas) => {
-		// CORREÇÃO: A forma correta de instanciar o jsPDF quando carregado via script
-		const doc = new window.jspdf.jsPDF({
-			orientation: "p",
-			unit: "mm",
-			format: "a4",
+	window
+		.html2canvas(rankingCard, { scale: 1.5 })
+		.then((canvas) => {
+			const doc = new window.jspdf.jsPDF({
+				orientation: "p",
+				unit: "mm",
+				format: "a4",
+			});
+
+			const imgData = canvas.toDataURL("image/jpeg, 0.9");
+			const imgProps = doc.getImageProperties(imgData);
+			const pdfWidth = doc.internal.pageSize.getWidth();
+			const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+			const pageHeightLimit = doc.internal.pageSize.getHeight() - 30;
+			const finalHeight =
+				pdfHeight > pageHeightLimit ? pageHeightLimit : pdfHeight;
+
+			doc.addImage(imgData, "JPEG", 0, 20, pdfWidth, finalHeight);
+
+			addHeaderAndFooter(doc);
+			doc.save("ranking_operadoras.pdf");
+
+			closeAlert();
+		})
+		.catch(() => {
+			closeAlert();
+			showErrorAlert("Erro ao gerar o PDF do ranking.");
 		});
-
-		const imgData = canvas.toDataURL("image/jpeg, 0.9");
-		const imgProps = doc.getImageProperties(imgData);
-		const pdfWidth = doc.internal.pageSize.getWidth();
-		const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-		// Limita a altura da imagem para não ultrapassar a página
-		const pageHeightLimit = doc.internal.pageSize.getHeight() - 30; // Subtrai margens
-		const finalHeight =
-			pdfHeight > pageHeightLimit ? pageHeightLimit : pdfHeight;
-
-		doc.addImage(imgData, "JPEG", 0, 20, pdfWidth, finalHeight);
-
-		addHeaderAndFooter(doc);
-		doc.save("ranking_operadoras.pdf");
-
-		Swal.close();
-	});
 }
 
 /**
@@ -87,40 +89,41 @@ export function exportIndividualReportPDF() {
 		"#individual-operator-name"
 	).innerText;
 
-	Swal.fire({
-		title: "Gerando Relatório...",
-		text: "Aguarde enquanto o relatório individual é criado.",
-		allowOutsideClick: false,
-		didOpen: () => {
-			Swal.showLoading();
-		},
-	});
+	showLoading("Gerando Relatório...");
 
-	window.html2canvas(reportCard, { scale: 1.5 }).then((canvas) => {
-		// CORREÇÃO: A forma correta de instanciar o jsPDF
-		const doc = new window.jspdf.jsPDF({
-			orientation: "p",
-			unit: "mm",
-			format: "a4",
+	window
+		.html2canvas(reportCard, { scale: 1.5 })
+		.then((canvas) => {
+			const doc = new window.jspdf.jsPDF({
+				orientation: "p",
+				unit: "mm",
+				format: "a4",
+			});
+
+			const imgData = canvas.toDataURL("image/jpeg, 0.9");
+			const imgProps = doc.getImageProperties(imgData);
+			const pdfWidth = doc.internal.pageSize.getWidth();
+			const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+			const pageHeightLimit = doc.internal.pageSize.getHeight() - 30;
+			const finalHeight =
+				pdfHeight > pageHeightLimit ? pageHeightLimit : pdfHeight;
+
+			doc.addImage(imgData, "JPEG", 0, 20, pdfWidth, finalHeight);
+
+			addHeaderAndFooter(doc);
+			doc.save(
+				`relatorio_${operatorName
+					.replace("Métricas de: ", "")
+					.trim()}.pdf`
+			);
+
+			closeAlert();
+			showSuccessAlert("Relatório individual gerado com sucesso!");
+		})
+		.catch(() => {
+			closeAlert();
+			showErrorAlert("Erro ao gerar o relatório individual.");
 		});
-
-		const imgData = canvas.toDataURL("image/jpeg, 0.9");
-		const imgProps = doc.getImageProperties(imgData);
-		const pdfWidth = doc.internal.pageSize.getWidth();
-		const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-		const pageHeightLimit = doc.internal.pageSize.getHeight() - 30;
-		const finalHeight =
-			pdfHeight > pageHeightLimit ? pageHeightLimit : pdfHeight;
-
-		doc.addImage(imgData, "JPEG", 0, 20, pdfWidth, finalHeight);
-
-		addHeaderAndFooter(doc);
-		doc.save(
-			`relatorio_${operatorName.replace("Métricas de: ", "").trim()}.pdf`
-		);
-
-		Swal.close();
-	});
 }
 
 /**
@@ -129,23 +132,14 @@ export function exportIndividualReportPDF() {
  * @param {Array} rankedData - O array completo com os dados do ranking.
  */
 export function exportRankingPDF_Native(rankedData) {
-	// 1. Feedback inicial para o usuário
-	Swal.fire({
-		title: "Gerando PDF...",
-		allowOutsideClick: false,
-		didOpen: () => {
-			Swal.showLoading();
-		},
-	});
+	showLoading("Gerando PDF...");
 
-	// 2. Cria uma nova instância do jsPDF
 	const doc = new window.jspdf.jsPDF({
 		orientation: "p",
 		unit: "mm",
 		format: "a4",
 	});
 
-	// 3. Adiciona o Título Principal
 	doc.setFontSize(18);
 	doc.setTextColor(40);
 	doc.text(
@@ -155,16 +149,13 @@ export function exportRankingPDF_Native(rankedData) {
 		{ align: "center" }
 	);
 
-	// 4. Adiciona legendas para os gráficos
 	doc.setFontSize(12);
-	doc.text("Análise Gráfica - TOP 3 Operadoras", 14, 32), { align: "center" };
+	doc.text("Análise Gráfica - TOP 3 Operadoras", 14, 32);
 
-	// 5. Captura e adiciona os gráficos lado a lado
 	const chartCanvas1 = document.getElementById("top3-chart");
 	const chartCanvas2 = document.querySelector("#top3-proportion-chart");
 
 	if (chartCanvas1 && chartCanvas2) {
-		// Pega a imagem do gráfico em alta qualidade
 		const chartImage1 = chartCanvas1.toDataURL("image/png", 1);
 		const chartImage2 = chartCanvas2.toDataURL("image/png", 1);
 
@@ -172,7 +163,6 @@ export function exportRankingPDF_Native(rankedData) {
 		const chartHeight = 60;
 		const startYCharts = 42;
 
-		// Adiciona Legenda e gráfico 1 (Transações PIX)
 		doc.setFontSize(10);
 		doc.addImage(
 			chartImage1,
@@ -182,7 +172,6 @@ export function exportRankingPDF_Native(rankedData) {
 			chartWidth,
 			chartHeight
 		);
-		// Adiciona legenda e gráfico 2 (Proporção PIX) ao lado
 		doc.addImage(
 			chartImage2,
 			"PNG",
@@ -192,12 +181,10 @@ export function exportRankingPDF_Native(rankedData) {
 			chartHeight
 		);
 
-		// 6. Gera a tabela TOP 20
 		doc.setFontSize(12);
-		const startYTableTitle = startYCharts + chartHeight + 12; // Posição Y abaixo dos gráficos
+		const startYTableTitle = startYCharts + chartHeight + 12;
 		doc.text("Top 20 Operadoras - Ranking PIX", 14, startYTableTitle);
 
-		// Filtra para pegar apenas os 20 primeiros
 		const top20Data = rankedData.slice(0, 20);
 
 		const head = [["Pos.", "Operadora", "Nº", "Trans. PIX", "Prop. PIX"]];
@@ -209,7 +196,6 @@ export function exportRankingPDF_Native(rankedData) {
 			`${(op.pixProportion * 100).toFixed(2)}%`,
 		]);
 
-		// Verifica se autoTable está disponível
 		if (typeof doc.autoTable === "function") {
 			doc.autoTable({
 				head: head,
@@ -227,16 +213,21 @@ export function exportRankingPDF_Native(rankedData) {
 			console.error(
 				"autoTable não está disponível. Verifique o carregamento do plugin."
 			);
+			closeAlert();
+			showErrorAlert(
+				"Erro ao gerar a tabela no PDF (autoTable não disponível)."
+			);
+			return;
 		}
 
-		// 7. Adiciona cabeçalho e rodapé
 		addHeaderAndFooter(doc);
 
-		// 8. Salva o arquivo
 		doc.save("ranking_top20_operadoras.pdf");
-		Swal.close();
+		closeAlert();
+		showSuccessAlert("PDF do ranking gerado com sucesso!");
 	} else {
 		console.error("Gráficos não encontrados no DOM.");
-		Swal.fire("Erro", "Gráficos não puderam ser capturados.", "error");
+		closeAlert();
+		showErrorAlert("Gráficos não puderam ser capturados.", "Erro");
 	}
 }

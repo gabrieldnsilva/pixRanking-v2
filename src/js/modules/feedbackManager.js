@@ -6,11 +6,10 @@
  * Exube um alerta de erro genérico
  * @param {string} message - A mensagem de erro a ser exibida
  */
-
-export function showErrorAlert(message) {
+export function showErrorAlert(message, title = "Opa...") {
 	Swal.fire({
 		icon: "error",
-		title: "Opa...",
+		title,
 		text: message,
 		confirmButtonColor: "#0b861cff",
 	});
@@ -20,7 +19,6 @@ export function showErrorAlert(message) {
  * Exibe uma notificação de sucesso que se fecha sozinha (toast)
  * @param {string} title - O título da notificação
  */
-
 export function showSuccessToast(title) {
 	Swal.fire({
 		toast: true,
@@ -34,10 +32,23 @@ export function showSuccessToast(title) {
 }
 
 /**
+ * Exibe um alerta de sucesso
+ * @param {string} message - A mensagem de sucesso a ser exibida
+ * @param {string} title - O título do alerta
+ */
+export function showSuccessAlert(message, title = "Sucesso!") {
+	Swal.fire({
+		icon: "success",
+		title,
+		text: message,
+		confirmButtonColor: "#0b861cff",
+	});
+}
+
+/**
  * Exibe um modal de status do upload que pode ser atualizado
  * @param {object} initialStatus - O estado inicial dos uploads
  */
-
 export function showUploadStatus(initialStatus = {}) {
 	// Helper para criar o ícone de status de cada item
 	const getIcon = (isLoaded) => {
@@ -75,6 +86,20 @@ export function showUploadStatus(initialStatus = {}) {
 }
 
 /**
+ * Exibe um modal de carregamento com uma mensagem customizável
+ * @param {string} message - A mensagem a ser exibida no modal
+ */
+export function showLoading(message = "Processando...") {
+	Swal.fire({
+		title: message,
+		allowOutsideClick: false,
+		didOpen: () => {
+			Swal.showLoading();
+		},
+	});
+}
+
+/**
  * Atualiza um item na lista de status do upload.
  * @param {string} fileKey - A chave do arquivo ('operators', 'pixData', 'debitData')
  */
@@ -89,9 +114,15 @@ export function updateUploadStatus(fileKey) {
 }
 
 /**
+ * Fecha qualquer alerta/modal aberto
+ */
+export function closeAlert() {
+	Swal.close();
+}
+
+/**
  * Fecha o modal de status e exibe uma mensagem final
  */
-
 export function closeUploadStatusAndShowSuccess() {
 	Swal.close();
 	showSuccessToast("Dados processados com sucesso!");
