@@ -7,9 +7,11 @@ $(document).ready(function () {
 		const email = $("#email").val();
 		const senha = $("#password").val();
 
+		console.log("Tentando logar com:", email, senha);
+
 		// Faz a requisição AJAX para nossa API de Login
 		$.ajax({
-			url: "api/login.php",
+			url: "/api/views/login.php",
 			type: "POST",
 			data: JSON.stringify({ email: email, senha: senha }),
 			success: function (response) {
