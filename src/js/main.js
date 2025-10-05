@@ -15,6 +15,29 @@ import {
 	closeUploadStatusAndShowSuccess,
 } from "./modules/feedbackManager.js";
 
+/**
+ * Verifica o status da sessão do usuário ao carregar a página.
+ * Se não autenticado, redireciona para a página de login.
+ * Se autenticado, permite que o resto do código seja executado.
+ */
+$.ajax({
+	url: "/api/views/session_status.php",
+	type: "GET",
+	dataType: "json",
+	success: function (response) {
+		if (!response.success) {
+			// Se a API retornar sucesso false (improvável aqui) ou erro, redireciona
+			window.location.replace("login.html");
+		}
+		// Se sucesso, o código continua e o document.ready será executado
+		console.log("Usuário autenticado:", response.data);
+	},
+	error: function () {
+		// Se a requisição falhar (erro 401, 500, etc), redireciona para o login
+		window.location.replace("login.html");
+	},
+});
+
 $(document).ready(function () {
 	// --- Estado Central da Aplicação ---
 	let appData = {

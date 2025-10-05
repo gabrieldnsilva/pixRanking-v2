@@ -30,14 +30,14 @@ try {
 
 
     // Monta o array de dados para o Model
-    $data = [
+    $userData = [
         "id" => $uuid,
-        "departamento" => $departamento,
-        "email" => $email,
+        "departamento" => $data->departamento,
+        "email" => $data->email,
         "senha_hash" => $senha_hash
     ];
 
-    if ($usuarioModel->create($data)) {
+    if ($usuarioModel->create($userData)) {
         http_response_code(201); // Created
         echo json_encode((["success" => true, "message" => "Usuário registrado com sucesso."]));
     } else {
