@@ -11,15 +11,11 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 
 // Se o script continuar, significa que o usuário está autenticado.
 // Podemos até retornar os dados do usuário para o front-end.
-$userInfo = [
-    'id' => $_SESSION['user_id'],
-    'email' => $_SESSION['user_email'],
-    'departamento' => $_SESSION['user_departamento']
-];
-
-// Esta função será usada para enviar os dados do usuário logado
 function get_user_info()
 {
-    global $userInfo;
-    return $userInfo;
+    return [
+        'id' => $_SESSION['user_id'],
+        'email' => $_SESSION['email'],
+        'departamento' => $_SESSION['departamento']
+    ];
 }

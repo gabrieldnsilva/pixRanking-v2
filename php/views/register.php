@@ -3,8 +3,8 @@
 // require_once './config/dbConfig.php';
 // require_once './api/models/Usuario.php';
 
-require_once "/home/gabrieldnsilva/projects/rankingPixDebito/config/dbConfig.php";
-require_once "/home/gabrieldnsilva/projects/rankingPixDebito/api/models/Usuario.php";
+require_once "./config/dbConfig.php";
+require_once "./models/Usuario.php";
 
 $db = connect_db();
 $usuarioModel = new Usuario($db);
