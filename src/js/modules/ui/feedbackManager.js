@@ -5,6 +5,7 @@
 /**
  * Exube um alerta de erro genérico
  * @param {string} message - A mensagem de erro a ser exibida
+ * @param {string} title - Título da mensagem
  */
 export function showErrorAlert(message, title = "Opa...") {
 	Swal.fire({
@@ -89,7 +90,7 @@ export function showUploadStatus(initialStatus = {}) {
  * Exibe um modal de carregamento com uma mensagem customizável
  * @param {string} message - A mensagem a ser exibida no modal
  */
-export function showLoading(message = "Processando...") {
+export function showLoading(message = "Processando") {
 	Swal.fire({
 		title: message,
 		allowOutsideClick: false,
@@ -117,7 +118,7 @@ export function updateUploadStatus(fileKey) {
  * Fecha qualquer alerta/modal aberto
  */
 export function closeAlert() {
-	Swal.close();
+	Swal.close;
 }
 
 /**

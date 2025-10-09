@@ -1,9 +1,8 @@
-import { switchView } from "./utils.js";
+import { switchView } from "../utils/utils.js";
 import {
-	exportRankingPDF,
 	exportIndividualReportPDF,
 	exportRankingPDF_Native,
-} from "./pdfGenerator.js";
+} from "../utils/pdfGenerator.js";
 
 /**
  * Módulo para manipular a interface do usuário (DOM).
@@ -259,6 +258,7 @@ function renderTablePage() {
                 <td>${operator.nome_operadora}</td>
                 <td>${operator.numero_operadora}</td>
                 <td>${operator.pixTransactions.toLocaleString("pt-BR")}</td>
+				<td>${operator.debitTransactions.toLocaleString("pt-BR")}</td>;
                 <td>${pixPercentage}</td>
                 <td>
                     <button class="btn btn-sm btn-outline-primary view-details-btn" data-operator-id="${

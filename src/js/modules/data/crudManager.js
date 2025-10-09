@@ -124,7 +124,7 @@ export function initCrud(appData, operatorModal) {
 		);
 
 		$.ajax({
-			url: "api/salvar_operadoras.php", // Nosso script PHP
+			url: "", // Nosso script PHP
 			type: "POST",
 			contentType: "application/json",
 			data: JSON.stringify(appData.operators),

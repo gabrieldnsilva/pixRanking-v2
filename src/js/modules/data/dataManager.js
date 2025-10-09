@@ -1,3 +1,9 @@
+import {
+	showErrorAlert,
+	showUploadStatus,
+	showSuccessToast,
+} from "../ui/feedbackManager.js";
+
 /* Módulo para gerenciar a leitura e o parsing de arquivos */
 
 /**
@@ -52,13 +58,13 @@ export function readCsvFile(file, type) {
 					// Se encontrou, remove a coluna original e renomeia para o tipo específico
 					if (quantityValue !== null && foundColumn) {
 						delete newRow[foundColumn]; // Remove a coluna original
+
 						if (type === "pix") {
 							newRow.QuantidadePix = quantityValue;
 						} else if (type === "debit") {
 							newRow.QuantidadeDebito = quantityValue;
 						}
 					} else {
-						// Log de aviso se nenhuma coluna for encontrada
 						console.warn(
 							"Linha sem coluna de quantidade válida:",
 							row
@@ -75,4 +81,49 @@ export function readCsvFile(file, type) {
 			},
 		});
 	});
+}
+
+// Classe para gerenciar os dados da aplicação
+export class DataManager {
+	constructor() {
+		this.operators = [];
+		this.pixData = [];
+		this.debitData = [];
+	}
+}
+
+export function loadInitialOperators( // Lembrar de commitar alteração
+	appData,
+	checkAndProcessData,
+	updateUploadStatus,
+	isStatusModalOpen
+) {
+	$.getJSON("data/operators.json")
+		.done(function (data) {
+			// Se bem-sucedido
+			appData.operators = data;
+
+			// Feedback sutil de dados carregados
+			showSuccessToast("Operadores carregados");
+
+			if (isStatusModalOpen) {
+				updateUploadStatus("operators");
+			}
+			checkAndProcessData();
+
+			// Atualiza a UI para refletir o carregamento
+			const $label = $("label[for='json-upload'] span");
+			$label.text("Operadores Carregados");
+			$label.parent().addClass("loaded");
+			$label
+				.siblings("i")
+				.removeClass("ri-database-2-line")
+				.addClass("ri-database-2-fill");
+		})
+		.fail(function () {
+			// Falha. Provavelmente o arquivo não existe.
+			console.warn(
+				"data/operators.json não encontrado. Aguardando upload manual."
+			);
+		});
 }

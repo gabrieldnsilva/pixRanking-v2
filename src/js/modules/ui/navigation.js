@@ -1,4 +1,4 @@
-import { switchView } from "./utils.js";
+import { switchView } from "../utils/utils.js";
 
 /**
  * Módulo para gerenciar a navegação principal da aplicação.

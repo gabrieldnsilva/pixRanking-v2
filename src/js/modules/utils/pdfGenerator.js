@@ -2,13 +2,12 @@
  * Módulo para gerenciar a exportação de relatórios em PDF.
  * Usa as bibliotecas jsPDF e html2canvas.
  */
-
 import {
 	showErrorAlert,
 	showSuccessAlert,
 	showLoading,
 	closeAlert,
-} from "./feedbackManager.js";
+} from "../ui/feedbackManager.js";
 
 /**
  * Adicionar um cabeçalho a rodapé padrão ao documento PDF.
@@ -42,45 +41,6 @@ function addHeaderAndFooter(doc) {
 }
 
 /**
- * Exporta a visão principal do ranking para um arquivo PDF.
- */
-export function exportRankingPDF() {
-	const rankingCard = document.querySelector("#ranking-view .card-body");
-
-	showLoading("Gerando PDF...");
-
-	window
-		.html2canvas(rankingCard, { scale: 1.5 })
-		.then((canvas) => {
-			const doc = new window.jspdf.jsPDF({
-				orientation: "p",
-				unit: "mm",
-				format: "a4",
-			});
-
-			const imgData = canvas.toDataURL("image/jpeg, 0.9");
-			const imgProps = doc.getImageProperties(imgData);
-			const pdfWidth = doc.internal.pageSize.getWidth();
-			const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-			const pageHeightLimit = doc.internal.pageSize.getHeight() - 30;
-			const finalHeight =
-				pdfHeight > pageHeightLimit ? pageHeightLimit : pdfHeight;
-
-			doc.addImage(imgData, "JPEG", 0, 20, pdfWidth, finalHeight);
-
-			addHeaderAndFooter(doc);
-			doc.save("ranking_operadoras.pdf");
-
-			closeAlert();
-		})
-		.catch(() => {
-			closeAlert();
-			showErrorAlert("Erro ao gerar o PDF do ranking.");
-		});
-}
-
-/**
  * Exporta a visão de métricas individuais para um arquivo PDF.
  */
 export function exportIndividualReportPDF() {
@@ -100,7 +60,7 @@ export function exportIndividualReportPDF() {
 				format: "a4",
 			});
 
-			const imgData = canvas.toDataURL("image/jpeg, 0.9");
+			const imgData = canvas.toDataURL("image/jpeg, 1.0");
 			const imgProps = doc.getImageProperties(imgData);
 			const pdfWidth = doc.internal.pageSize.getWidth();
 			const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
@@ -156,8 +116,8 @@ export function exportRankingPDF_Native(rankedData) {
 	const chartCanvas2 = document.querySelector("#top3-proportion-chart");
 
 	if (chartCanvas1 && chartCanvas2) {
-		const chartImage1 = chartCanvas1.toDataURL("image/png", 1);
-		const chartImage2 = chartCanvas2.toDataURL("image/png", 1);
+		const chartImage1 = chartCanvas1.toDataURL("image/png", 1.5);
+		const chartImage2 = chartCanvas2.toDataURL("image/png", 1.5);
 
 		const chartWidth = 88.5;
 		const chartHeight = 60;
@@ -193,6 +153,7 @@ export function exportRankingPDF_Native(rankedData) {
 			op.nome_operadora,
 			op.numero_operadora,
 			op.pixTransactions.toLocaleString("pt-BR"),
+			op.debitTransactions.toLocaleString("pt-BR"),
 			`${(op.pixProportion * 100).toFixed(2)}%`,
 		]);
 
