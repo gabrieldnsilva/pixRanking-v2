@@ -40,17 +40,28 @@
 					<p class="nav-section-title mt-4">Início</p>
 					<ul class="nav-list">
 						<li>
-							<a href="#" id="dashboard-link" class="nav-link">
+							<a
+								href="#"
+								id="dashboard-link"
+								class="nav-link"
+								data-perm="view-reports"
+							>
 								<i class="ri-dashboard-line"></i>
 								<span> Dashboard </span>
 							</a>
 						</li>
 					</ul>
 
-					<p class="nav-section-title">Processar Dados</p>
-					<ul class="nav-list">
+					<p class="nav-section-title" data-perm="upload-csv">
+						Processar Dados
+					</p>
+					<ul
+						class="nav-list"
+						id="upload-section"
+						data-perm="upload-csv"
+					>
 						<li>
-							<label for="json-upload" class="nav-link">
+							<label for="json-upload" class="nav-link" data-perm="manage-operators>
 								<i class="ri-database-2-line"></i
 								><span>Substituir Operadoras</span></label
 							>
@@ -85,13 +96,19 @@
 								hidden
 							/>
 						</li>
-						<p class="nav-section-title mt-4">Gerenciamento</p>
+						<p
+							class="nav-section-title mt-4"
+							data-perm="manage-operators"
+						>
+							Gerenciamento
+						</p>
 						<ul class="nav-list">
 							<li>
 								<a
 									href="#"
-									id="manage-operators-link"
 									class="nav-link"
+									id="manage-operators-link"
+									data-perm="manage-operators"
 								>
 									<i class="ri-settings-3-line"></i
 									><span>Gerenciar Operadoras</span></a
