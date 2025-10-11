@@ -4,6 +4,10 @@
  */
 
 import { checkAuthStatus } from "./modules/auth/auth.js";
+import {
+	applyRoleVisibility,
+	computePermissions,
+} from "./modules/auth/roles.js";
 import { initializeApp } from "./modules/initializeApp.js";
 
 /**
@@ -16,6 +20,10 @@ export async function startApp() {
 
 		// Verifica se o usuário está autenticado
 		const userData = await checkAuthStatus();
+
+		const perms =
+			userData.permissions || computePermissions(userData.departamento);
+		applyRoleVisibility(perms);
 
 		// Se chegou até aqui, o usuário está autenticado
 		console.log("✅ Usuário autenticado:", userData.email);
