@@ -1,10 +1,6 @@
 #Github 
 .github/
 
-# Database configuration
-config/dbConfig.php
-*.sql
-*.db
 
 # Environment files
 .env

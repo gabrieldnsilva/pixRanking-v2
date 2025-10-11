@@ -2,8 +2,6 @@
 
 // api/config.php
 
-session_start();
-
 // --- Configurações do Banco de Dados MariaDB ---
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'ranking_db');

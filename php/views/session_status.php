@@ -2,7 +2,7 @@
 // api/views/session_status.php
 session_start();
 
-require_once "./php/core/auth_check.php";
+require_once "/home/gabrieldnsilva/projects/rankingPixDebito/php/core/auth_check.php";
 
 // Headers para JSON
 header('Content-Type: application/json');

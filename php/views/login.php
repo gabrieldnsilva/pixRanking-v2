@@ -1,8 +1,8 @@
 <?php
 
 // Importações
-require_once "./config/dbConfig.php";
-require_once "./models/Usuario.php";
+require_once "/home/gabrieldnsilva/projects/rankingPixDebito/config/dbConfig.php";
+require_once "/home/gabrieldnsilva/projects/rankingPixDebito/php/models/Usuario.php";
 
 session_start();
 
