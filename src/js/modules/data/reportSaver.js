@@ -43,7 +43,19 @@ export function initReportSaver(appData) {
 		}
 
 		// Usa os dados do ranking atual armazenados no módulo
-		const dados_relatorio = currentRankedData || [];
+		const dados_relatorio = (currentRankedData || []).map((r) => ({
+			numero_operadora: r.numero_operadora,
+			nome_operadora: r.nome_operadora,
+			pixTransactions: r.pixTransactions || 0,
+			debitTransactions: r.debitTransactions || 0,
+			totalTransactions:
+				r.totalTransactions ||
+				(r.pixTransactions || 0) + (r.debitTransactions || 0),
+			pixProportion:
+				r.totalTransactions > 0
+					? (r.pixTransactions || 0) / (r.totalTransactions || 1)
+					: r.pixProportion || 0,
+		}));
 
 		showLoading("Salvando relatório...");
 
