@@ -56,7 +56,7 @@ export function initializeApp() {
 				// Habilita agora o botão de exportação e salvamento
 				$("#export-ranking-pdf").prop("disabled", false);
 
-				updateCurrentRankedData(rankedData);
+				updateCurrentRankedData(appData);
 
 				// Fecha o modal de status e mostra sucesso
 				closeUploadStatusAndShowSuccess();

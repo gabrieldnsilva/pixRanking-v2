@@ -5,59 +5,53 @@
  * @param array $ranked linhas de operadores ranqueadas
  * @param array $ctx contexto do relatório
  */
-function shape_report_payload(array $ranked, array $ctx): array
+function shape_report_payload(array $dados_relatorio, array $ctx): array
 {
 
     // Tratamento do caso de já estar no schema, retorna como está (idempotente)
-    if (isset($ranked['schema_version']) && isset($ranked['ranking'])) {
-        return $ranked;
+    if (isset($dados_relatorio['schema_version']) && isset($dados_relatorio['primary_data'])) {
+        return $dados_relatorio;
     }
+    // Sanitiza os dados primários
+    $operators = [];
+    $pixData = [];
+    $debitData = [];
 
-    // Whitelist de campos por linha
-    $rows = [];
-    $pixTotal = 0;
-    $debitTotal = 0;
-
-    foreach ($ranked as $row) {
-
-        // Aceita camelCase/underscore como usual
-        $numero = $row['numero_operadora'] ?? $row['Operador'] ?? null;
-        $nome   = $row['nome_operadora'] ?? $row['Operadora'] ?? null;
-
-        $pix   = (int)($row['pixTransactions'] ?? 0);
-        $debit = (int)($row['debitTransactions'] ?? 0);
-        $total = (int)($row['totalTransactions'] ?? ($pix + $debit));
-        $prop  = $total > 0 ? ($pix / $total) : 0;
-
-        if ($numero === null || $nome === null) {
-            // Ignora linhas sem identificador
-            continue;
+    // Sanitiza operadores
+    if (isset($dados_relatorio['operators']) && is_array($dados_relatorio['operators'])) {
+        foreach ($dados_relatorio['operators'] as $op) {
+            $operators[] = [
+                'numero_operadora' => (int)($op['numero_operadora'] ?? 0),
+                'nome_operadora' => (string)($op['nome_operadora'] ?? ''),
+            ];
         }
-
-        $pixTotal += $pix;
-        $debitTotal += $debit;
-
-        $rows[] = [
-            'numero_operadora'  => (int)$numero,
-            'nome_operadora'    => (string)$nome,
-            'pixTransactions'   => $pix,
-            'debitTransactions' => $debit,
-            'totalTransactions' => $total,
-            'pixProportion'     => (float)$prop,
-        ];
     }
 
-    // Resumo do conteúdo
-    usort($rows, fn($a, $b) => $b['pixTransactions'] <=> $a['pixTransactions']);
-    $top3 = array_slice(array_map(fn($r) => $r['numero_operadora'], $rows), 0, 3);
-    $summary = [
-        'operators'        => count($rows),
-        'pixTotal'         => $pixTotal,
-        'debitTotal'       => $debitTotal,
-        'totalTransactions' => $pixTotal + $debitTotal,
-        'top3'             => $top3,
-    ];
+    // Sanitiza dados PIX
+    if (isset($dados_relatorio['pixData']) && is_array($dados_relatorio['pixData'])) {
+        foreach ($dados_relatorio['pixData'] as $pix) {
+            $pixData[] = [
+                'Operador' => (int)($pix['Operador'] ?? 0),
+                'QuantidadePix' => (int)($pix['QuantidadePix'] ?? 0),
+            ];
+        }
+    }
 
+    // Sanitiza dados Débito
+    if (isset($dados_relatorio['debitData']) && is_array($dados_relatorio['debitData'])) {
+        foreach ($dados_relatorio['debitData'] as $debit) {
+            $debitData[] = [
+                'Operador' => (int)($debit['Operador'] ?? 0),
+                'QuantidadeDebito' => (int)($debit['QuantidadeDebito'] ?? 0),
+            ];
+        }
+    }
+
+    // Calcula estatísticas básicas para coleta de metadados
+    $totalPix = array_sum(array_column($pixData, 'QuantidadePix'));
+    $totalDebit = array_sum(array_column($debitData, 'QuantidadeDebito'));
+
+    // Contexto (período, usuário)
     $generated_at = (new DateTimeImmutable('now'))->format(DateTime::ATOM);
     $period = [
         'start' => $ctx['period']['start'] ?? null,
@@ -74,7 +68,17 @@ function shape_report_payload(array $ranked, array $ctx): array
         'generated_at'   => $generated_at,
         'generated_by'   => $generated_by,
         'period'         => $period,
-        'summary'        => $summary,
-        'ranking'        => $rows,
+        'summary' => [
+            'operators_count' => count($operators),
+            'total_pix'       => $totalPix,
+            'total_debit'     => $totalDebit,
+            'total_transactions' => $totalPix + $totalDebit,
+        ],
+        // DADOS PRIMÁRIOS - permitirão recriar o relatório completamente
+        'primary_data' => [
+            'operators'  => $operators,
+            'pixData'    => $pixData,
+            'debitData'  => $debitData,
+        ]
     ];
 }

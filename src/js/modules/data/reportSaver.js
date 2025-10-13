@@ -8,7 +8,7 @@ import {
 	closeAlert,
 } from "../ui/feedbackManager.js";
 
-let currentRankedData = null;
+let currentAppData = null;
 
 /**
  * Inicializa o módulo de salvamento de relatórios
@@ -42,20 +42,21 @@ export function initReportSaver(appData) {
 			return;
 		}
 
-		// Usa os dados do ranking atual armazenados no módulo
-		const dados_relatorio = (currentRankedData || []).map((r) => ({
-			numero_operadora: r.numero_operadora,
-			nome_operadora: r.nome_operadora,
-			pixTransactions: r.pixTransactions || 0,
-			debitTransactions: r.debitTransactions || 0,
-			totalTransactions:
-				r.totalTransactions ||
-				(r.pixTransactions || 0) + (r.debitTransactions || 0),
-			pixProportion:
-				r.totalTransactions > 0
-					? (r.pixTransactions || 0) / (r.totalTransactions || 1)
-					: r.pixProportion || 0,
-		}));
+		// Salva os dados PRIMÁRIOS (sanitizados) que permitirão recriar o relatório
+		const dados_relatorio = {
+			operators: currentAppData.operators.map((op) => ({
+				numero_operadora: parseInt(op.numero_operadora),
+				nome_operadora: String(op.nome_operadora).trim(),
+			})),
+			pixData: currentAppData.pixData.map((pix) => ({
+				Operador: parseInt(pix.Operador),
+				QuantidadePix: parseInt(pix.QuantidadePix || 0),
+			})),
+			debitData: currentAppData.debitData.map((debit) => ({
+				Operador: parseInt(debit.Operador),
+				QuantidadeDebito: parseInt(debit.QuantidadeDebito || 0),
+			})),
+		};
 
 		showLoading("Salvando relatório...");
 
@@ -88,14 +89,13 @@ export function initReportSaver(appData) {
 }
 
 /**
- * Atualiza os dados do ranking atual para salvamento
- * @param {Array} rankedData - Dados do ranking processado
+ * Atualiza os dados completos da aplicação para salvamento
+ * @param {Object} appData - Estado completo da aplicação (operators, pixData, debitData)
  */
-export function updateCurrentRankedData(rankedData) {
-	currentRankedData = rankedData;
-	// Habilita o botão de salvar quando há dados
-	$("#save-report-btn").prop(
-		"disabled",
-		!rankedData || rankedData.length === 0
-	);
+export function updateCurrentAppData(appData) {
+	currentAppData = appData;
+	// Habilita o botão de salvar quando temos todos os dados
+	const hasAllData =
+		appData && appData.operators && appData.pixData && appData.debitData;
+	$("#save-report-btn").prop("disabled", !hasAllData);
 }
