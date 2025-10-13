@@ -2,7 +2,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
 :root {
-	--sidebar-width: 300px;
+	--sidebar-width: 320px;
 	--sidebar-width-collapsed: 92px;
 	--sidebar-bg: #111827;
 	--sidebar-text-color: white;
@@ -24,7 +24,7 @@ body {
 /* Estilos da Sidebar */
 .sidebar {
 	width: var(--sidebar-width);
-	height: 100vh;
+	min-height: 100vh;
 	background: 
 	/* Raios prateados via gradientes radiais (simulando luz cortando) */ radial-gradient(
 			circle at 20% 80%,
