@@ -8,6 +8,10 @@ import {
 // --- Módulos das regras de negócio ---
 import { processAndRankData } from "./data/analysis.js";
 import { initCrud } from "./data/crudManager.js";
+import {
+	initReportSaver,
+	updateCurrentRankedData,
+} from "./data/reportSaver.js";
 
 // --- Módulos de Interface do Usuário ---
 import { displayRanking } from "./ui/uiManager.js";
@@ -49,8 +53,10 @@ export function initializeApp() {
 				const rankedData = processAndRankData(appData);
 				displayRanking(rankedData);
 
-				// Habilita agora o botão de exportação
+				// Habilita agora o botão de exportação e salvamento
 				$("#export-ranking-pdf").prop("disabled", false);
+
+				updateCurrentRankedData(rankedData);
 
 				// Fecha o modal de status e mostra sucesso
 				closeUploadStatusAndShowSuccess();
@@ -102,6 +108,7 @@ export function initializeApp() {
 		initSidebarToggle();
 		const crudManager = initCrud(appData, operatorModal);
 		initNavigation(crudManager);
+		initReportSaver(appData);
 
 		// 2. Configura os listeners de upload de arquivos
 		setupAppFileUploadListener("#json-upload", readJsonFile, "operators");

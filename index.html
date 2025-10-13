@@ -61,7 +61,11 @@
 						data-perm="upload-csv"
 					>
 						<li>
-							<label for="json-upload" class="nav-link" data-perm="manage-operators>
+							<label
+								for="json-upload"
+								class="nav-link"
+								data-perm="manage-operators"
+							>
 								<i class="ri-database-2-line"></i
 								><span>Substituir Operadoras</span></label
 							>
@@ -129,10 +133,12 @@
 			</aside>
 			<div class="main-content">
 				<header class="main-header">
-					<h1>Ranking Operadoras</h1>
-					<button id="logout-btn" class="btn btn-outline-danger">
-						<i class="ri-logout-box-line"></i> Sair
-					</button>
+					<div class="header-content">
+						<h1>Ranking Operadoras</h1>
+						<button id="logout-btn" class="btn btn-outline-danger">
+							<i class="ri-logout-box-r-line"></i> Sair
+						</button>
+					</div>
 				</header>
 
 				<main class="container-fluid">
@@ -202,14 +208,28 @@
 										</button>
 									</div>
 								</nav>
-								<button
-									id="export-ranking-pdf"
-									class="btn btn-primary mt-3"
-									disabled
-								>
-									<i class="ri-file-pdf-2-fill"></i> Exportar
-									Ranking (PDF)
-								</button>
+								<div class="footer-dashboard-actions">
+									<!-- Botão para exportar PDF -->
+									<button
+										id="export-ranking-pdf"
+										class="btn btn-primary"
+										disabled
+									>
+										<i class="ri-file-pdf-2-fill"></i>
+										Exportar Ranking (PDF)
+									</button>
+
+									<!-- Botão para salvar relatórios-->
+									<button
+										id="save-report-btn"
+										class="btn btn-success"
+										data-perm="upload-csv"
+										disabled
+									>
+										<i class="ri-save-3-line"></i>Salvar
+										Relatório
+									</button>
+								</div>
 							</div>
 						</div>
 					</section>
@@ -297,6 +317,7 @@
 				</main>
 			</div>
 		</div>
+		<!-- Modal para adicionar operadora -->
 		<div
 			class="modal fade"
 			id="operator-modal"
@@ -317,6 +338,7 @@
 							aria-label="Close"
 						></button>
 					</div>
+
 					<div class="modal-body">
 						<form id="operator-form">
 							<input type="hidden" id="operador-id-hidden" />
@@ -361,6 +383,69 @@
 						</button>
 					</div>
 				</div>
+			</div>
+		</div>
+
+		<!-- Modal para salvar relatório -->
+		<div
+			class="modal fade"
+			id="saveReportModal"
+			tabindex="-1"
+			aria-labelledby="saveReportModalLabel"
+			aria-hidden="true"
+		>
+			<div class="modal-dialog">
+				<form id="save-report-form" class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="saveReportModalLabel">
+							Salvar Relatório Gerado
+						</h5>
+						<button
+							type="button"
+							class="btn-close"
+							data-bs-dismiss="modal"
+							aria-label="Fechar"
+						></button>
+					</div>
+					<div class="modal-body">
+						<div class="mb-3">
+							<label for="data-inicial" class="form-label"
+								>Data Inicial</label
+							>
+							<input
+								type="date"
+								class="form-control"
+								id="data-inicial"
+								name="data_inicial"
+								required
+							/>
+						</div>
+						<div class="mb-3">
+							<label for="data-final" class="form-label"
+								>Data Final</label
+							>
+							<input
+								type="date"
+								class="form-control"
+								id="data-final"
+								name="data_final"
+								required
+							/>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-success">
+							Confirmar
+						</button>
+						<button
+							type="button"
+							class="btn btn-secondary"
+							data-bs-dismiss="modal"
+						>
+							Cancelar
+						</button>
+					</div>
+				</form>
 			</div>
 		</div>
 		<script

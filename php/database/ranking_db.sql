@@ -17,12 +17,6 @@ CREATE TABLE ranking_operadoras (
     numero_operadora INT PRIMARY KEY,
     nome_operadora VARCHAR(255) NOT NULL
 );
--- Tabela para o Último Relatório com prefixo
-CREATE TABLE ranking_ultimo_relatorio (
-    id INT PRIMARY KEY DEFAULT 1,
-    dados_relatorio JSON NOT NULL,
-    data_geracao TIMESTAMP NOT NULL
-);
 -- Tabela para o Histórico de Relatórios com prefixo
 CREATE TABLE ranking_relatorios_salvos (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

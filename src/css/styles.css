@@ -381,6 +381,20 @@ body {
 	border-bottom: 1px solid rgba(39, 174, 96, 0.2);
 }
 
+/* Botões de ação do foorter da dashboard lado a lado */
+.footer-dashboard-actions {
+	display: flex;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+	margin-top: 1.5rem;
+	justify-content: flex-end;
+}
+
+.footer-dashboard-actions .btn {
+	flex: 1; /* Botões ocupam o mesmo espaço */
+	min-width: 180px;
+}
+
 /* Estilos das Views */
 
 .view {
@@ -418,4 +432,16 @@ body.sidebar-collapsed .nav-link span {
 body.sidebar-collapsed .sidebar-header,
 body.sidebar-collapsed .nav-link {
 	justify-content: center;
+}
+
+/* Ajustes para telas menores */
+@media (max-width: 768px) {
+	.footer-dashboard-actions {
+		flex-direction: column;
+	}
+
+	.footer-dashboard-actions .btn {
+		flex: none;
+		width: 100%;
+	}
 }
