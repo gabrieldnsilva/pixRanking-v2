@@ -1,9 +1,8 @@
 <?php
 
 /**
- * Moldar e sanitizar o payload do relatório antes da persistência
- * @param array $ranked linhas de operadores ranqueadas
- * @param array $ctx contexto do relatório
+ * Formata e sanitiza o payload do relatório antes de persistir.
+ * Agora salva os dados PRIMÁRIOS (operators, pixData, debitData) para permitir recriação completa.
  */
 function shape_report_payload(array $dados_relatorio, array $ctx): array
 {

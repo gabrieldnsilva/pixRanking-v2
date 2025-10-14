@@ -8,10 +8,8 @@ import {
 // --- Módulos das regras de negócio ---
 import { processAndRankData } from "./data/analysis.js";
 import { initCrud } from "./data/crudManager.js";
-import {
-	initReportSaver,
-	updateCurrentRankedData,
-} from "./data/reportSaver.js";
+import { initReportSaver, updateCurrentAppData } from "./data/reportSaver.js";
+import { initReportHistory } from "./data/reportHistory.js";
 
 // --- Módulos de Interface do Usuário ---
 import { displayRanking } from "./ui/uiManager.js";
@@ -21,7 +19,6 @@ import { initSidebarToggle } from "./ui/components/sidebarToggle.js";
 // --- Módulos de feedback ao usuário ---
 import {
 	showErrorAlert,
-	showSuccessToast,
 	showUploadStatus,
 	updateUploadStatus,
 	closeUploadStatusAndShowSuccess,
@@ -56,7 +53,8 @@ export function initializeApp() {
 				// Habilita agora o botão de exportação e salvamento
 				$("#export-ranking-pdf").prop("disabled", false);
 
-				updateCurrentRankedData(appData);
+				// Atualiza os dados atuais no módulo de salvamento
+				updateCurrentAppData(appData);
 
 				// Fecha o modal de status e mostra sucesso
 				closeUploadStatusAndShowSuccess();
@@ -108,6 +106,18 @@ export function initializeApp() {
 		initSidebarToggle();
 		const crudManager = initCrud(appData, operatorModal);
 		initNavigation(crudManager);
+
+		// Integrar histórico: carregar relatório salvo preenche appData e recalcula
+		initReportHistory({
+			onLoadReport: (
+				loadedAppData /* {operators,pixData,debitData} */
+			) => {
+				appData = loadedAppData;
+				checkAndProcessData();
+			},
+		});
+
+		// Inicializa o módulo de salvamento de relatórios
 		initReportSaver(appData);
 
 		// 2. Configura os listeners de upload de arquivos
