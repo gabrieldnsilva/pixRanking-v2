@@ -169,8 +169,19 @@ body {
 	transition: background 0.5s ease; /* Transição mais lenta para efeito dramático */
 }
 
+/* Melhorias na estrutura do Cabeçalho */
 .main-header {
 	margin-bottom: 1.5rem;
+	padding: 1rem 0;
+	border-bottom: 2px solid rgba(39, 174, 96, 0.1);
+}
+
+.header-content {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+	gap: 1rem;
 }
 
 .main-header h1 {
@@ -178,15 +189,49 @@ body {
 	font-weight: 700;
 	margin: 0;
 	color: #2c3e50;
+	flex-grow: 1;
 }
 
 .main-header .btn {
-	display: flex;
+	display: inline-flex;
 	align-items: center;
-	justify-content: flex-end;
+	justify-content: center;
 	gap: 0.5rem;
-	color: aliceblue;
-	font-size: 1.5rem;
+	padding: 0.75rem 1.25rem;
+	font-size: 0.95rem;
+	font-weight: 500;
+	border-radius: 0.5rem;
+	transition: all 0.3s ease;
+	text-decoration: none;
+	min-width: 100px;
+	white-space: nowrap;
+
+	/* Cores mais acessíveis */
+	background-color: transparent;
+	color: #dc3545;
+	border: 2px solid #dc3545;
+}
+
+.main-header .btn:hover {
+	background-color: #dc3545;
+	color: #fff;
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.main-header .btn:focus {
+	outline: 3px solid rgba(220, 53, 69, 0.3);
+	outline-offset: 2px;
+}
+
+.main-header .btn:active {
+	transform: translateY(0);
+	box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+}
+
+/* Ícone do botão */
+.main-header .btn i {
+	font-size: 1.1rem;
 }
 
 /* Cards com bordas e efeitos de raios laranja/verde */
@@ -443,5 +488,41 @@ body.sidebar-collapsed .nav-link {
 	.footer-dashboard-actions .btn {
 		flex: none;
 		width: 100%;
+		.header-content {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 0.75rem;
+		}
+
+		.main-header h1 {
+			font-size: 1.5rem;
+		}
+
+		.main-header .btn {
+			align-self: flex-end;
+			font-size: 0.9rem;
+			padding: 0.6rem 1rem;
+			min-width: auto;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.header-content {
+			flex-direction: row;
+			justify-content: space-between;
+		}
+
+		.main-header h1 {
+			font-size: 1.3rem;
+		}
+
+		.main-header .btn {
+			padding: 0.5rem 0.75rem;
+			font-size: 0.85rem;
+		}
+
+		.main-header .btn span {
+			display: none; /* Esconde o texto "Sair" em telas muito pequenas */
+		}
 	}
 }
