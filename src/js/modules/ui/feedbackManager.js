@@ -118,7 +118,7 @@ export function updateUploadStatus(fileKey) {
  * Fecha qualquer alerta/modal aberto
  */
 export function closeAlert() {
-	Swal.close;
+	Swal.close();
 }
 
 /**

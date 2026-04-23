@@ -40,8 +40,8 @@ export function initCrud(appData, operatorModal) {
 
 	// Botão "Adicionar Nova Operadora"
 	$("#add-operator-btn").on("click", function () {
-		$("#operator-form")[0].reset(); // Limpa o formulário
-		$("#operator-id-hidden").val(""); // Garante que o campo oculto está vazio
+		$("#operator-form")[0].reset();
+		$("#operator-id-hidden").val("");
 		$("#operator-modal-label").text("Adicionar Nova Operadora");
 		operatorModal.show();
 	});
@@ -60,7 +60,7 @@ export function initCrud(appData, operatorModal) {
 		if (originalId) {
 			// Edição
 			const operator = appData.operators.find(
-				(op) => op.numero_operadora === originalId
+				(op) => op.numero_operadora == originalId
 			);
 			if (operator) {
 				operator.nome_operadora = newName;
@@ -72,7 +72,7 @@ export function initCrud(appData, operatorModal) {
 				(op) => op.numero_operadora === newNumber
 			);
 			if (exists) {
-				alert("O númeero da operadora já existe.");
+				alert("O número da operadora já existe.");
 				return;
 			}
 			appData.operators.push({
@@ -124,28 +124,40 @@ export function initCrud(appData, operatorModal) {
 		);
 
 		$.ajax({
-			url: "", // Nosso script PHP
+			url: "php/core/ranking_operadoras.php",
 			type: "POST",
 			contentType: "application/json",
 			data: JSON.stringify(appData.operators),
 			success: function (response) {
-				alert(response.message);
-				// Opcional: recarregar os dados para garantir consistência
-				loadInitialOperators();
+				alert(response.message || "Alterações salvas com sucesso!");
+
+				// Recarregar operadoras do banco após salvar
+				$.getJSON("php/core/ranking_operadoras.php")
+					.done(function (data) {
+						appData.operators = data;
+						populateCrudTable();
+					})
+					.fail(function () {
+						console.error(
+							"Erro ao recarregar operadoras após salvar"
+						);
+					});
 			},
-			error: function () {
+			error: function (xhr) {
+				console.error("Erro ao salvar:", xhr.responseText);
 				alert(
-					"Erro: Não foi possível salvar as alterações. Verifique se o servidor está funcionando corretamente."
+					"Erro: Não foi possível salvar as alterações. Verifique o servidor."
 				);
 			},
 			complete: function () {
 				$btn.prop("disabled", false).html(
-					'<i class="ri-save-3-line"></i> Salvar Alterações no Servidor'
+					'<i class="ri-save-3-line"></i> Salvar Alterações'
 				);
 			},
 		});
 	});
 
+	// ✅ RETORNAR OBJETO COM FUNÇÃO EXPOSTA
 	return {
 		populateCrudTable,
 	};

@@ -112,6 +112,40 @@ html {
 	font-size: 0.9rem;
 }
 
+/* ...existing code... */
+
+/* ✅ Animação de Loading */
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.spin {
+	display: inline-block;
+	animation: spin 1s linear infinite;
+}
+
+/* ✅ Feedback Visual de Status */
+#reset-status {
+	border-left: 4px solid;
+}
+
+#reset-status.alert-info {
+	border-left-color: #0dcaf0;
+}
+
+#reset-status.alert-success {
+	border-left-color: #198754;
+}
+
+#reset-status.alert-danger {
+	border-left-color: #dc3545;
+}
+
 .btn-register {
 	border-color: var(--cor-primaria-verde); /* Green border */
 	color: var(--cor-primaria-verde);

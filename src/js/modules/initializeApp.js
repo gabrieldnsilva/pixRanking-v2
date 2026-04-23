@@ -8,16 +8,29 @@ import {
 // --- Módulos das regras de negócio ---
 import { processAndRankData } from "./data/analysis.js";
 import { initCrud } from "./data/crudManager.js";
+import { initReportSaver, updateCurrentAppData } from "./data/reportSaver.js";
+import { initReportHistory } from "./data/reportHistory.js";
+import {
+	findMissingOperatorNumbers,
+	listUnknownOperatorRows,
+	formatMissingSummary,
+} from "./data/missingOperators.js";
+import { initPdfPeriodModal, setPdfPeriod } from "./utils/pdfPeriodManager.js";
+import { exportRankingPDF_Native } from "./utils/pdfGenerator.js";
 
 // --- Módulos de Interface do Usuário ---
-import { displayRanking } from "./ui/uiManager.js";
+import {
+	displayRanking,
+	initTableSearch,
+	initTableSorting,
+} from "./ui/uiManager.js";
 import { initNavigation } from "./ui/navigation.js";
 import { initSidebarToggle } from "./ui/components/sidebarToggle.js";
+import { initMissingOperatorsUI } from "./ui/missingOperatorsUI.js";
 
 // --- Módulos de feedback ao usuário ---
 import {
 	showErrorAlert,
-	showSuccessToast,
 	showUploadStatus,
 	updateUploadStatus,
 	closeUploadStatusAndShowSuccess,
@@ -49,8 +62,42 @@ export function initializeApp() {
 				const rankedData = processAndRankData(appData);
 				displayRanking(rankedData);
 
-				// Habilita agora o botão de exportação
+				// 2) Detectar operadoras ausentes (apenas admin/gestão)
+				// Elemento controlado por RBAC: data-perm="manage-operators"
+				const $badge = $("#missing-operators-badge span");
+				if ($badge.length) {
+					const missing = findMissingOperatorNumbers(appData);
+					const summary = formatMissingSummary(missing);
+					if (missing.length) {
+						$badge
+							.text(` (${missing.length})`)
+							.removeClass("d-none")
+							.addClass("badge bg-warning text-dark ms-2");
+					} else {
+						$badge
+							.text(" ✓")
+							.removeClass("d-none")
+							.addClass("badge bg-success text-white ms-2");
+					}
+
+					// Log opcional para auditoria
+					const { unknownPix, unknownDebit } =
+						listUnknownOperatorRows(appData);
+					console.debug(
+						"[Pendências] PIX desconhecidos:",
+						unknownPix.length,
+					);
+					console.debug(
+						"[Pendências] Débito desconhecidos:",
+						unknownDebit.length,
+					);
+				}
+
+				// Habilita agora o botão de exportação e salvamento
 				$("#export-ranking-pdf").prop("disabled", false);
+
+				// Atualiza os dados atuais no módulo de salvamento
+				updateCurrentAppData(appData);
 
 				// Fecha o modal de status e mostra sucesso
 				closeUploadStatusAndShowSuccess();
@@ -63,36 +110,33 @@ export function initializeApp() {
 		 * Adapta a função do dataManager para usar o estado local da aplicação
 		 */
 		function setupAppFileUploadListener(selector, readerFunction, dataKey) {
-			$(selector).on("change", function (event) {
+			$(selector).on("change", async function (event) {
 				const file = event.target.files[0];
 				if (!file) return;
 
-				// Se for o primeiro upload, mostra modal de status
-				if (!isStatusModalOpen) {
-					const currentStatus = {
-						operators: !!appData.operators,
-						pixData: !!appData.pixData,
-						debitData: !!appData.debitData,
-					};
-					showUploadStatus(currentStatus);
-					isStatusModalOpen = true;
-				}
+				try {
+					showUploadStatus(`Carregando ${dataKey}...`);
+					const parsedData = await readerFunction(file);
+					appData[dataKey] = parsedData;
 
-				readerFunction(file)
-					.then((data) => {
-						appData[dataKey] = data;
+					if (isStatusModalOpen) {
 						updateUploadStatus(dataKey);
-						checkAndProcessData();
-					})
-					.catch((error) => {
-						showErrorAlert(
-							`Ocorreu um erro ao carregar o arquivo: ${error}`
-						);
-						if (isStatusModalOpen) {
-							Swal.close();
-							isStatusModalOpen = false;
-						}
-					});
+					}
+
+					checkAndProcessData();
+					closeUploadStatusAndShowSuccess(
+						`${dataKey} carregado com sucesso!`,
+					);
+				} catch (err) {
+					console.error(`Erro ao carregar ${dataKey}:`, err);
+					showErrorAlert(
+						"Falha ao carregar arquivo",
+						`Ocorreu um erro ao processar ${dataKey}.`,
+					);
+				} finally {
+					// Reseta input para permitir novo upload do mesmo arquivo
+					$(this).val("");
+				}
 			});
 		}
 
@@ -103,17 +147,54 @@ export function initializeApp() {
 		const crudManager = initCrud(appData, operatorModal);
 		initNavigation(crudManager);
 
+		// Inicializa a UI de operadores ausentes
+		initMissingOperatorsUI(appData, crudManager);
+
+		// Inicializa o modal de período para PDF
+		initPdfPeriodModal((period) => {
+			if (
+				appData &&
+				appData.operators &&
+				appData.pixData &&
+				appData.debitData
+			) {
+				const rankedData = processAndRankData(appData);
+				exportRankingPDF_Native(rankedData);
+			}
+		});
+
+		// Integrar histórico: carregar relatório salvo preenche appData e recalcula
+		initReportHistory({
+			onLoadReport: (
+				loadedAppData /* {operators,pixData,debitData} */,
+			) => {
+				appData = loadedAppData;
+				checkAndProcessData();
+
+				// ⬇️ NOVO: Restaura período para PDF ao carregar relatório salvo
+				if (loadedAppData.data_inicial && loadedAppData.data_final) {
+					setPdfPeriod({
+						start: loadedAppData.data_inicial,
+						end: loadedAppData.data_final,
+					});
+				}
+			},
+		});
+
+		// Inicializa o módulo de salvamento de relatórios
+		initReportSaver(appData);
+
 		// 2. Configura os listeners de upload de arquivos
 		setupAppFileUploadListener("#json-upload", readJsonFile, "operators");
 		setupAppFileUploadListener(
 			"#pix-upload",
 			(file) => readCsvFile(file, "pix"),
-			"pixData"
+			"pixData",
 		);
 		setupAppFileUploadListener(
 			"#debit-upload",
 			(file) => readCsvFile(file, "debit"),
-			"debitData"
+			"debitData",
 		);
 
 		// 3. Carrega os dados iniciais
@@ -121,8 +202,12 @@ export function initializeApp() {
 			appData,
 			checkAndProcessData,
 			updateUploadStatus,
-			() => isStatusModalOpen
+			() => isStatusModalOpen,
 		);
+
+		// ✅ Inicializa ordenação de tabelas
+		initTableSorting();
+		initTableSearch();
 
 		// 4. Configura logout
 		setupLogoutHandler("#logout-btn");

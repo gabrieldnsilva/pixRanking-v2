@@ -45,19 +45,36 @@ export function readCsvFile(file, type) {
 				const adjustedData = results.data.map((row) => {
 					const newRow = { ...row };
 
+					// Detectar coluna de quantidade
 					let quantityValue = null;
-					let foundColumn = null;
+					let foundQuantityColumn = null;
 					for (const key in newRow) {
 						if (key.toLowerCase().includes("quantidade")) {
 							quantityValue = newRow[key];
-							foundColumn = key;
+							foundQuantityColumn = key;
 							break; // Usa a primeira correspondência
 						}
 					}
 
-					// Se encontrou, remove a coluna original e renomeia para o tipo específico
-					if (quantityValue !== null && foundColumn) {
-						delete newRow[foundColumn]; // Remove a coluna original
+					// Detectar coluna de valor total (apenas para PIX)
+					let valueAmount = null;
+					let foundValueColumn = null;
+					if (type === "pix") {
+						for (const key in newRow) {
+							if (
+								key.toLowerCase().includes("valor") &&
+								key.toLowerCase().includes("total")
+							) {
+								valueAmount = newRow[key];
+								foundValueColumn = key;
+								break;
+							}
+						}
+					}
+
+					// Se encontrou quantidade, remove a coluna original e renomeia para o tipo específico
+					if (quantityValue !== null && foundQuantityColumn) {
+						delete newRow[foundQuantityColumn]; // Remove a coluna original
 
 						if (type === "pix") {
 							newRow.QuantidadePix = quantityValue;
@@ -69,6 +86,15 @@ export function readCsvFile(file, type) {
 							"Linha sem coluna de quantidade válida:",
 							row
 						);
+					}
+
+					// Se encontrou valor total (PIX), remove a coluna original e renomeia
+					if (type === "pix" && foundValueColumn) {
+						delete newRow[foundValueColumn];
+						newRow.ValorTotalPix = valueAmount || 0;
+					} else if (type === "pix") {
+						// Coluna valor não encontrada - define como 0 para retrocompatibilidade
+						newRow.ValorTotalPix = 0;
 					}
 
 					return newRow;
@@ -92,28 +118,20 @@ export class DataManager {
 	}
 }
 
-export function loadInitialOperators( // Lembrar de commitar alteração
+export function loadInitialOperators(
 	appData,
 	checkAndProcessData,
 	updateUploadStatus,
 	isStatusModalOpen
 ) {
-	$.getJSON("data/operators.json")
+	$.getJSON("php/core/ranking_operadoras.php")
 		.done(function (data) {
-			// Se bem-sucedido
 			appData.operators = data;
-
-			// Feedback sutil de dados carregados
-			showSuccessToast("Operadores carregados");
-
-			if (isStatusModalOpen) {
-				updateUploadStatus("operators");
-			}
+			showSuccessToast("Operadoras carregadas do servidor");
+			if (isStatusModalOpen) updateUploadStatus("operators");
 			checkAndProcessData();
-
-			// Atualiza a UI para refletir o carregamento
 			const $label = $("label[for='json-upload'] span");
-			$label.text("Operadores Carregados");
+			$label.text("Operadoras Carregadas");
 			$label.parent().addClass("loaded");
 			$label
 				.siblings("i")
@@ -121,9 +139,25 @@ export function loadInitialOperators( // Lembrar de commitar alteração
 				.addClass("ri-database-2-fill");
 		})
 		.fail(function () {
-			// Falha. Provavelmente o arquivo não existe.
-			console.warn(
-				"data/operators.json não encontrado. Aguardando upload manual."
-			);
+			// fallback original (JSON local)
+			$.getJSON("data/operators.json")
+				.done(function (data) {
+					appData.operators = data;
+					showSuccessToast("Operadores carregados");
+					if (isStatusModalOpen) updateUploadStatus("operators");
+					checkAndProcessData();
+					const $label = $("label[for='json-upload'] span");
+					$label.text("Operadores Carregados");
+					$label.parent().addClass("loaded");
+					$label
+						.siblings("i")
+						.removeClass("ri-database-2-line")
+						.addClass("ri-database-2-fill");
+				})
+				.fail(function () {
+					console.warn(
+						"data/operators.json não encontrado. Aguardando upload manual."
+					);
+				});
 		});
 }

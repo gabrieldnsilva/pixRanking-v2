@@ -3,6 +3,9 @@ import {
 	exportIndividualReportPDF,
 	exportRankingPDF_Native,
 } from "../utils/pdfGenerator.js";
+import { TableFilter } from "../ui/tableFilters.js";
+import { formatBRL, toNumberStrict } from "../utils/numbers.js";
+import { showPdfPeriodModal } from "../utils/pdfPeriodManager.js";
 
 /**
  * Módulo para manipular a interface do usuário (DOM).
@@ -11,9 +14,11 @@ import {
 // Estado da paginação
 let currentPage = 1;
 const ROWS_PER_PAGE = 10;
-let fullRankedData = []; // Armazena todos os dados para paginação
-let chartInstance = null; // Instância do gráfico
-let individualChartInstance = null; // Instância do gráfico individual
+let fullRankedData = [];
+let originalRankedData = [];
+let chartInstance = null;
+let individualChartInstance = null;
+let tableFilter = new TableFilter(); // ✅ NOVA INSTÂNCIA
 
 /**
  * Mostra a tela de detalhes de uma operadora específica
@@ -22,28 +27,34 @@ let individualChartInstance = null; // Instância do gráfico individual
 function displayIndividualMetrics(operatorId) {
 	// Encontra o objeto completo da operadora no nosso array de dados
 	const operatorData = fullRankedData.find(
-		(op) => op.numero_operadora == operatorId
+		(op) => op.numero_operadora == operatorId,
 	);
 	if (!operatorData) return;
 
 	// Atualiza o título da seção e o resumo
 	$("#individual-operator-name").text(
-		`Métricas de: ${operatorData.nome_operadora}`
+		`Métricas de: ${operatorData.nome_operadora}`,
 	);
+
+	// Formatar valor total PIX como moeda
+	const pixValueFormatted = formatBRL(operatorData.pixValue);
+
 	$("#metrics-summary").html(`
         <ul class="list-group list-group-flush">
+		
             <li class="list-group-item"><strong>Nº da Operadora:</strong> ${
 				operatorData.numero_operadora
 			}</li>
-            <li class="list-group-item"><strong>Transações PIX:</strong> ${operatorData.pixTransactions.toLocaleString(
-				"pt-BR"
-			)}</li>
-            <li class="list-group-item"><strong>Transações Débito:</strong> ${operatorData.debitTransactions.toLocaleString(
-				"pt-BR"
-			)}</li>
-            <li class="list-group-item"><strong>Total de Transações:</strong> ${operatorData.totalTransactions.toLocaleString(
-				"pt-BR"
-			)}</li>
+            <li class="list-group-item"><strong>Transações PIX:</strong> ${toNumberStrict(
+				operatorData.pixTransactions,
+			).toLocaleString("pt-BR")}</li>
+            <li class="list-group-item"><strong>Valor Total PIX:</strong> ${pixValueFormatted}</li>
+            <li class="list-group-item"><strong>Transações Débito:</strong> ${toNumberStrict(
+				operatorData.debitTransactions,
+			).toLocaleString("pt-BR")}</li>
+            <li class="list-group-item"><strong>Total de Transações:</strong> ${toNumberStrict(
+				operatorData.totalTransactions,
+			).toLocaleString("pt-BR")}</li>
             <li class="list-group-item"><strong>Proporção PIX:</strong> ${(
 				operatorData.pixProportion * 100
 			).toFixed(2)}%</li>
@@ -186,7 +197,7 @@ function displayTop3ProportionChart(top3ProportionData) {
 	// Extrai os nomes e os valores para os eixos do gráfico
 	const labels = top3ProportionData.map((op) => op.nome_operadora);
 	const data = top3ProportionData.map((op) =>
-		(op.pixProportion * 100).toFixed(2)
+		(op.pixProportion * 100).toFixed(2),
 	); // Proporção em %
 
 	// Destrói qualquer instância anterior do gráfico
@@ -242,23 +253,38 @@ function renderTablePage() {
 	const $rankingBody = $("#ranking-body");
 	$rankingBody.empty();
 
-	// Calcula os índices de início e fim para o .slice()
+	// ✅ Atualiza contador de resultados
+	updateResultsCount();
+
+	if (fullRankedData.length === 0) {
+		$rankingBody.html(
+			'<tr><td colspan="8" class="text-center text-muted">Nenhuma operadora encontrada com os filtros atuais.</td></tr>',
+		);
+		updatePaginationControls();
+		return;
+	}
+
 	const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
 	const endIndex = startIndex + ROWS_PER_PAGE;
 	const paginatedData = fullRankedData.slice(startIndex, endIndex);
 
 	paginatedData.forEach((operator, index) => {
-		// O rank deve ser calculado com base na página atual
 		const rank = startIndex + index + 1;
 		const pixPercentage = (operator.pixProportion * 100).toFixed(2) + "%";
+		const pixValueFormatted = formatBRL(operator.pixValue);
 
 		const row = `
             <tr>
                 <td><strong>${rank}</strong></td>
                 <td>${operator.nome_operadora}</td>
                 <td>${operator.numero_operadora}</td>
-                <td>${operator.pixTransactions.toLocaleString("pt-BR")}</td>
-				<td>${operator.debitTransactions.toLocaleString("pt-BR")}</td>;
+                <td>${toNumberStrict(operator.pixTransactions).toLocaleString(
+					"pt-BR",
+				)}</td>
+                <td>${pixValueFormatted}</td>
+                <td>${toNumberStrict(operator.debitTransactions).toLocaleString(
+					"pt-BR",
+				)}</td>
                 <td>${pixPercentage}</td>
                 <td>
                     <button class="btn btn-sm btn-outline-primary view-details-btn" data-operator-id="${
@@ -280,11 +306,105 @@ function renderTablePage() {
  */
 function updatePaginationControls() {
 	const totalPages = Math.ceil(fullRankedData.length / ROWS_PER_PAGE);
-	$("#page-info").text(`Página ${currentPage} de ${totalPages}`);
+	$("#page-info").text(`Página ${currentPage} de ${totalPages || 1}`);
 
-	// Desabilita/habilita os botões conforme a página atual
 	$("#prev-page-btn").prop("disabled", currentPage === 1);
-	$("#next-page-btn").prop("disabled", currentPage === totalPages);
+	$("#next-page-btn").prop(
+		"disabled",
+		currentPage === totalPages || totalPages === 0,
+	);
+}
+
+/**
+ * ✅ NOVA FUNÇÃO: Atualiza contador de resultados
+ */
+function updateResultsCount() {
+	const total = originalRankedData.length;
+	const filtered = fullRankedData.length;
+
+	if (filtered < total) {
+		$("#results-count").html(
+			`Exibindo <strong>${filtered}</strong> de <strong>${total}</strong> operadoras`,
+		);
+	} else {
+		$("#results-count").html(
+			`<strong>${total}</strong> operadoras cadastradas`,
+		);
+	}
+}
+
+/**
+ * ✅ NOVA FUNÇÃO: Atualiza indicadores visuais de ordenação
+ */
+function updateSortIndicators() {
+	const { column, direction } = tableFilter.getCurrentSort();
+
+	$(".sortable-header").removeClass("sort-asc sort-desc");
+
+	const $activeHeader = $(`.sortable-header[data-column="${column}"]`);
+	$activeHeader.addClass(direction === "asc" ? "sort-asc" : "sort-desc");
+}
+
+/**
+ * ✅ ATUALIZADA: Aplica todos os filtros (busca + ordenação)
+ */
+function applyAllFilters() {
+	fullRankedData = tableFilter.applyAll(originalRankedData);
+	currentPage = 1; // Volta para primeira página
+	renderTablePage();
+	updateSortIndicators();
+}
+
+/**
+ * ✅ NOVA FUNÇÃO: Inicializa event listeners para ordenação
+ */
+export function initTableSorting() {
+	// Remove listeners anteriores
+	$(".sortable-header").off("click");
+
+	$(".sortable-header").on("click", function () {
+		const column = $(this).data("column");
+
+		if (!column || originalRankedData.length === 0) return;
+
+		tableFilter.toggleSort(column);
+		applyAllFilters(); // ✅ Usa função centralizada
+	});
+}
+
+/**
+ * ✅ NOVA FUNÇÃO: Inicializa busca por nome/número
+ */
+export function initTableSearch() {
+	const $searchInput = $("#operator-search");
+	const $clearBtn = $("#clear-search-btn");
+
+	// Remove listeners anteriores
+	$searchInput.off("input");
+	$clearBtn.off("click");
+
+	// Busca em tempo real (debounced)
+	let searchTimeout;
+	$searchInput.on("input", function () {
+		clearTimeout(searchTimeout);
+		const term = $(this).val();
+
+		searchTimeout = setTimeout(() => {
+			tableFilter.setSearchTerm(term);
+			applyAllFilters();
+
+			// Mostra/oculta botão de limpar
+			$clearBtn.toggle(term.length > 0);
+		}, 300); // 300ms de delay para evitar filtrar a cada tecla
+	});
+
+	// Botão de limpar busca
+	$clearBtn.on("click", function () {
+		$searchInput.val("");
+		tableFilter.clearSearch();
+		applyAllFilters();
+		$(this).hide();
+	});
 }
 
 // Event Listeners para os botões de paginação
@@ -314,15 +434,11 @@ $(document).on("click", "#next-page-btn", function () {
 });
 
 /**  Listener para o botão de exportar o ranking geral
-$(document).on("click", "#export-ranking-pdf", function () {
-	exportRankingPDF();
-});
-*/
-
+ */
 $(document).on("click", "#export-ranking-pdf", function () {
 	// A variável 'fullRankedData' já contém todos os dados que precisamos
 	if (fullRankedData && fullRankedData.length > 0) {
-		exportRankingPDF_Native(fullRankedData);
+		showPdfPeriodModal();
 	} else {
 		alert("Não há dados para exportar.");
 	}
@@ -340,23 +456,32 @@ $(document).on("click", "#export-individual-pdf", function () {
 export function displayRanking(rankedData) {
 	if (!rankedData || rankedData.length === 0) {
 		$("#ranking-body").html(
-			'<tr><td colspan="6" class="text-center">Nenhum dado para exibir.</td></tr>'
+			'<tr><td colspan="7" class="text-center">Nenhum dado para exibir.</td></tr>',
 		);
 		return;
 	}
 
-	fullRankedData = rankedData;
-	currentPage = 1; // Reseta para a primeira página a cada novo carregamento
+	// ✅ Armazena cópia dos dados originais
+	originalRankedData = [...rankedData];
 
-	// --- Gráfico TOP 3 por Transações PIX ---
-	const top3 = fullRankedData.slice(0, 3);
+	// ✅ Reseta filtros
+	tableFilter.reset();
+	$("#operator-search").val(""); // Limpa input de busca
+	$("#clear-search-btn").hide();
+
+	// ✅ Aplica filtros padrão
+	fullRankedData = tableFilter.applyAll(originalRankedData);
+	currentPage = 1;
+
+	// Gráficos TOP 3 (usa dados originais, não filtrados)
+	const top3 = [...originalRankedData].slice(0, 3);
 	displayTop3Chart(top3);
 
-	// --- Novo: Gráfico TOP 3 por Proporção PIX ---
-	const top3Proportion = [...fullRankedData]
+	const top3Proportion = [...originalRankedData]
 		.sort((a, b) => b.pixProportion - a.pixProportion)
 		.slice(0, 3);
 	displayTop3ProportionChart(top3Proportion);
 
 	renderTablePage();
+	updateSortIndicators();
 }
