@@ -26,12 +26,13 @@ function shape_report_payload(array $dados_relatorio, array $ctx): array
         }
     }
 
-    // Sanitiza dados PIX
+    // Sanitiza dados PIX (inclui ValorTotalPix com fallback para relatórios antigos)
     if (isset($dados_relatorio['pixData']) && is_array($dados_relatorio['pixData'])) {
         foreach ($dados_relatorio['pixData'] as $pix) {
             $pixData[] = [
                 'Operador' => (int)($pix['Operador'] ?? 0),
                 'QuantidadePix' => (int)($pix['QuantidadePix'] ?? 0),
+                'ValorTotalPix' => (float)($pix['ValorTotalPix'] ?? 0),
             ];
         }
     }
@@ -48,6 +49,7 @@ function shape_report_payload(array $dados_relatorio, array $ctx): array
 
     // Calcula estatísticas básicas para coleta de metadados
     $totalPix = array_sum(array_column($pixData, 'QuantidadePix'));
+    $totalPixValue = array_sum(array_column($pixData, 'ValorTotalPix'));
     $totalDebit = array_sum(array_column($debitData, 'QuantidadeDebito'));
 
     // Contexto (período, usuário)
@@ -70,6 +72,7 @@ function shape_report_payload(array $dados_relatorio, array $ctx): array
         'summary' => [
             'operators_count' => count($operators),
             'total_pix'       => $totalPix,
+            'total_pix_value' => $totalPixValue,
             'total_debit'     => $totalDebit,
             'total_transactions' => $totalPix + $totalDebit,
         ],

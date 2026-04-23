@@ -2,11 +2,34 @@
 
 session_start();
 
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 
-require_once "/home/gabrieldnsilva/projects/rankingPixDebito/config/dbConfig.php";
-require_once "/home/gabrieldnsilva/projects/rankingPixDebito/php/core/report_schema.php";
-require_once "/home/gabrieldnsilva/projects/rankingPixDebito/php/core/auth_permissions.php";
+require_once "../../config/dbConfig.php";
+require_once "../../php/core/report_schema.php";
+require_once "../../php/core/auth_permissions.php";
+
+// Normalização robusta (aceita "R$ 2.355,78", "2,355.78", números)
+function to_number_strict($value)
+{
+    if (is_numeric($value)) return (float)$value;
+    if ($value === null) return 0.0;
+    $s = trim((string)$value);
+    if ($s === "") return 0.0;
+
+    $clean = preg_replace('/[^\d,.\-]/', '', $s);
+
+    // BR: vírgula como decimal
+    $posComma = strrpos($clean, ',');
+    $posDot   = strrpos($clean, '.');
+    if ($posComma !== false && ($posDot === false || $posComma > $posDot)) {
+        $normalized = str_replace(['.', ','], ['', '.'], $clean);
+        return (float)$normalized;
+    }
+
+    // US: ponto decimal
+    $normalized = str_replace(',', '', $clean);
+    return (float)$normalized;
+}
 
 $pdo = connect_db();
 

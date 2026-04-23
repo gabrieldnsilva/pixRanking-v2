@@ -6,6 +6,29 @@ import {
 	showLoading,
 	closeAlert,
 } from "../ui/feedbackManager.js";
+import { toNumberStrict } from "../utils/numbers.js";
+
+// ⬇️ NOVA FUNÇÃO - adicionar após os imports
+/**
+ * Normaliza dados carregados do backend (double-check para dados legados)
+ * @param {Array} pixData - Array de transações PIX
+ * @param {Array} debitData - Array de transações débito
+ * @returns {Object} { pixData, debitData } normalizados
+ */
+function normalizeLoadedData(pixData, debitData) {
+	const normalizedPix = (pixData || []).map((pix) => ({
+		...pix,
+		QuantidadePix: toNumberStrict(pix.QuantidadePix || 0),
+		ValorTotalPix: toNumberStrict(pix.ValorTotalPix || 0), // ⬅️ crítico
+	}));
+
+	const normalizedDebit = (debitData || []).map((debit) => ({
+		...debit,
+		QuantidadeDebito: toNumberStrict(debit.QuantidadeDebito || 0),
+	}));
+
+	return { pixData: normalizedPix, debitData: normalizedDebit };
+}
 
 export function initReportHistory({ onLoadReport }) {
 	// Abrir modal e carregar lista
@@ -14,21 +37,19 @@ export function initReportHistory({ onLoadReport }) {
 		.on("click", "#open-saved-reports", async function () {
 			try {
 				showLoading("Carregando relatórios...");
-				const resp = await $.getJSON(
-					"/php/views/list_saved_reports.php"
-				);
+				const resp = await $.getJSON("php/views/list_saved_report.php");
 
 				if (!resp?.success) {
 					closeAlert();
 					showErrorAlert(
-						resp?.message || "Não foi possível listar relatórios."
+						resp?.message || "Não foi possível listar relatórios.",
 					);
 					return;
 				}
 
 				renderList(resp.data || []);
 				$("#savedReportsModal").modal("show");
-				closeAlert(); // Fechar o alerta após a renderização
+				closeAlert();
 			} catch (e) {
 				closeAlert();
 				showErrorAlert("Erro ao listar relatórios.");
@@ -45,27 +66,37 @@ export function initReportHistory({ onLoadReport }) {
 			try {
 				showLoading("Carregando relatório...");
 				const resp = await $.getJSON(
-					`/php/views/load_saved_report.php?id=${id}`
+					`php/views/load_saved_report.php?id=${id}`,
 				);
 
 				if (!resp?.success) {
 					closeAlert();
 					showErrorAlert(
 						resp?.message ||
-							"Não foi possível carregar o relatório."
+							"Não foi possível carregar o relatório.",
 					);
 					return;
 				}
 
+				// ⬇️ ALTERAÇÃO - normalizar antes de passar para o callback
+				const { pixData, debitData } = normalizeLoadedData(
+					resp.data.pixData,
+					resp.data.debitData,
+				);
+
 				const appData = {
 					operators: resp.data.operators || [],
-					pixData: resp.data.pixData || [],
-					debitData: resp.data.debitData || [],
+					pixData, // ⬅️ normalizado
+					debitData, // ⬅️ normalizado
+
+					// Inclui período salvo para possível restauração
+					data_inicial: resp.data.data_inicial || null,
+					data_final: resp.data.data_final || null,
 				};
 
 				$("#savedReportsModal").modal("hide");
-				closeAlert(); // Fechar o alerta após carregar o relatório
-				onLoadReport(appData, resp.data); // callback do orquestrador
+				closeAlert();
+				onLoadReport(appData, resp.data); // callback do orquestrador (initializeApp.js)
 			} catch (e) {
 				closeAlert();
 				showErrorAlert("Erro ao carregar o relatório.");
@@ -79,7 +110,7 @@ function renderList(items) {
 
 	if (!items.length) {
 		tbody.append(
-			`<tr><td colspan="5" class="text-center">Nenhum relatório salvo.</td></tr>`
+			`<tr><td colspan="5" class="text-center">Nenhum relatório salvo.</td></tr>`,
 		);
 		return;
 	}

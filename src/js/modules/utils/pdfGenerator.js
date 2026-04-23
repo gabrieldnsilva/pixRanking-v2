@@ -2,12 +2,15 @@
  * Módulo para gerenciar a exportação de relatórios em PDF.
  * Usa as bibliotecas jsPDF e html2canvas.
  */
+
+import { getPdfPeriod } from "../utils/pdfPeriodManager.js";
 import {
 	showErrorAlert,
 	showSuccessAlert,
 	showLoading,
 	closeAlert,
 } from "../ui/feedbackManager.js";
+import { formatBRL, toNumberStrict } from "./numbers.js";
 
 /**
  * Adicionar um cabeçalho a rodapé padrão ao documento PDF.
@@ -17,6 +20,14 @@ function addHeaderAndFooter(doc) {
 	const pageCount = doc.internal.getNumberOfPages();
 	const pageWidth = doc.internal.pageSize.getWidth();
 	const pageHeight = doc.internal.pageSize.getHeight();
+
+	// ⬇️ ALTERADO: Busca período do modal PDF (não do reportSaver)
+	const period = getPdfPeriod();
+	const periodText = period
+		? `Período de: ${formatDateBR(period.start)} até ${formatDateBR(
+				period.end,
+			)}`
+		: "";
 
 	for (let i = 1; i <= pageCount; i++) {
 		doc.setPage(i);
@@ -31,10 +42,17 @@ function addHeaderAndFooter(doc) {
 		// Rodapé
 		doc.setFontSize(8);
 		doc.setTextColor(100);
-		const footerText = `Página ${i} de ${pageCount} | Gerado em: ${new Date().toLocaleDateString(
-			"pt-BR"
-		)}`;
-		doc.text(footerText, pageWidth / 2, pageHeight - 10, {
+		// ⬇️ ALTERADO: Adiciona período e data de geração
+		const generatedDate = `Gerado em: ${new Date().toLocaleDateString("pt-BR")}`;
+		const footerLine1 = periodText
+			? `${periodText} | ${generatedDate}`
+			: generatedDate;
+		const footerLine2 = `Página ${i} de ${pageCount}`;
+
+		doc.text(footerLine1, pageWidth / 2, pageHeight - 14, {
+			align: "center",
+		});
+		doc.text(footerLine2, pageWidth / 2, pageHeight - 10, {
 			align: "center",
 		});
 	}
@@ -46,7 +64,7 @@ function addHeaderAndFooter(doc) {
 export function exportIndividualReportPDF() {
 	const reportCard = document.querySelector("#individual-view .card-body");
 	const operatorName = document.querySelector(
-		"#individual-operator-name"
+		"#individual-operator-name",
 	).innerText;
 
 	showLoading("Gerando Relatório...");
@@ -74,7 +92,7 @@ export function exportIndividualReportPDF() {
 			doc.save(
 				`relatorio_${operatorName
 					.replace("Métricas de: ", "")
-					.trim()}.pdf`
+					.trim()}.pdf`,
 			);
 
 			closeAlert();
@@ -106,7 +124,7 @@ export function exportRankingPDF_Native(rankedData) {
 		"Ranking de Performance de Operadoras",
 		doc.internal.pageSize.getWidth() / 2,
 		22,
-		{ align: "center" }
+		{ align: "center" },
 	);
 
 	doc.setFontSize(12);
@@ -130,7 +148,7 @@ export function exportRankingPDF_Native(rankedData) {
 			14,
 			startYCharts,
 			chartWidth,
-			chartHeight
+			chartHeight,
 		);
 		doc.addImage(
 			chartImage2,
@@ -138,7 +156,7 @@ export function exportRankingPDF_Native(rankedData) {
 			14 + chartWidth + 5,
 			startYCharts,
 			chartWidth,
-			chartHeight
+			chartHeight,
 		);
 
 		doc.setFontSize(12);
@@ -147,13 +165,24 @@ export function exportRankingPDF_Native(rankedData) {
 
 		const top20Data = rankedData.slice(0, 20);
 
-		const head = [["Pos.", "Operadora", "Nº", "Trans. PIX", "Prop. PIX"]];
+		const head = [
+			[
+				"Pos.",
+				"Operadora",
+				"Nº",
+				"Qtd. PIX",
+				"Valor PIX",
+				"Qtd. Debito",
+				"Prop. PIX",
+			],
+		];
 		const body = top20Data.map((op, i) => [
 			i + 1,
 			op.nome_operadora,
 			op.numero_operadora,
-			op.pixTransactions.toLocaleString("pt-BR"),
-			op.debitTransactions.toLocaleString("pt-BR"),
+			toNumberStrict(op.pixTransactions).toLocaleString("pt-BR"),
+			formatBRL(op.pixValue), // Formatar como moeda BRL
+			toNumberStrict(op.debitTransactions).toLocaleString("pt-BR"),
 			`${(op.pixProportion * 100).toFixed(2)}%`,
 		]);
 
@@ -165,18 +194,19 @@ export function exportRankingPDF_Native(rankedData) {
 				theme: "grid",
 				styles: { fontSize: 8, cellPadding: 1.5 },
 				headStyles: {
-					fillColor: [41, 128, 185],
+					fillColor: [39, 174, 96],
 					textColor: 255,
+					styles: { fontSize: 9, cellPadding: 3 },
 					fontStyle: "bold",
 				},
 			});
 		} else {
 			console.error(
-				"autoTable não está disponível. Verifique o carregamento do plugin."
+				"autoTable não está disponível. Verifique o carregamento do plugin.",
 			);
 			closeAlert();
 			showErrorAlert(
-				"Erro ao gerar a tabela no PDF (autoTable não disponível)."
+				"Erro ao gerar a tabela no PDF (autoTable não disponível).",
 			);
 			return;
 		}
@@ -191,4 +221,10 @@ export function exportRankingPDF_Native(rankedData) {
 		closeAlert();
 		showErrorAlert("Gráficos não puderam ser capturados.", "Erro");
 	}
+}
+
+function formatDateBR(dateString) {
+	if (!dateString) return "";
+	const [year, month, day] = dateString.split("-");
+	return `${day}/${month}/${year}`;
 }

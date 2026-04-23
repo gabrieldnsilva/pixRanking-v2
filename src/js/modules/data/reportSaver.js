@@ -7,6 +7,7 @@ import {
 	showLoading,
 	closeAlert,
 } from "../ui/feedbackManager.js";
+import { toNumberStrict } from "../utils/numbers.js";
 
 let currentAppData = null;
 
@@ -53,11 +54,12 @@ export function initReportSaver(appData) {
 				!currentAppData.debitData
 			) {
 				showErrorAlert(
-					"Dados incompletos. Carregue todos os arquivos antes de salvar."
+					"Dados incompletos. Carregue todos os arquivos antes de salvar.",
 				);
 				return;
 			}
 
+			// Salva os dados PRIMÁRIOS (sanitizados) que permitirão recriar o relatório
 			// Salva os dados PRIMÁRIOS (sanitizados) que permitirão recriar o relatório
 			const dados_relatorio = {
 				operators: currentAppData.operators.map((op) => ({
@@ -67,6 +69,8 @@ export function initReportSaver(appData) {
 				pixData: currentAppData.pixData.map((pix) => ({
 					Operador: parseInt(pix.Operador),
 					QuantidadePix: parseInt(pix.QuantidadePix || 0),
+					// ⬇️ normaliza valor para número puro, independente de "R$" ou formatação
+					ValorTotalPix: toNumberStrict(pix.ValorTotalPix || 0),
 				})),
 				debitData: currentAppData.debitData.map((debit) => ({
 					Operador: parseInt(debit.Operador),
@@ -78,7 +82,7 @@ export function initReportSaver(appData) {
 
 			try {
 				const resp = await $.ajax({
-					url: "/php/views/save_report.php",
+					url: "php/views/save_report.php",
 					type: "POST",
 					contentType: "application/json",
 					data: JSON.stringify({
@@ -96,7 +100,7 @@ export function initReportSaver(appData) {
 					$("#save-report-form")[0].reset();
 				} else {
 					showErrorAlert(
-						(resp && resp.message) || "Erro ao salvar relatório."
+						(resp && resp.message) || "Erro ao salvar relatório.",
 					);
 				}
 			} catch (err) {
