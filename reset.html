@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link
+			rel="icon"
+			type="image/x-icon"
+			href="./assets/img/icons/fav-Icon.webp"
+		/>
+		<title>Redefinir Senha - Ranking PIX</title>
+		<link rel="stylesheet" href="./src/css/components/login.css" />
+		<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+			rel="stylesheet"
+		/>
+		<link
+			href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css"
+			rel="stylesheet"
+		/>
+	</head>
+	<body>
+		<div class="container-fluid login-wrapper">
+			<div class="row w-100">
+				<!-- Branding Section -->
+				<div class="col-md-6 d-none d-md-flex branding-section">
+					<div>
+						<img
+							src="./assets/img/icons/fav-Icon.webp"
+							alt="Logo Ranking PIX"
+							class="branding-logo"
+						/>
+						<div class="logo-text">RANKING PIX</div>
+						<h1>Redefinir Senha</h1>
+						<p>
+							Crie uma nova senha segura para acessar o portal de
+							análise de transações PIX.
+						</p>
+					</div>
+				</div>
+
+				<!-- Form Section -->
+				<div class="col-12 col-md-6 form-section">
+					<div class="login-form">
+						<div class="card border-0 rounded-4">
+							<div class="card-body p-3 p-md-4 p-xl-5">
+								<h2 class="mb-3 text-center">Nova Senha</h2>
+
+								<!-- Status Message -->
+								<div
+									id="reset-status"
+									class="alert d-none"
+									role="alert"
+								></div>
+
+								<!-- Reset Form -->
+								<form id="reset-form">
+									<div class="form-floating mb-3">
+										<input
+											type="password"
+											class="form-control"
+											id="reset-password"
+											required
+											minlength="6"
+											placeholder="Nova senha"
+											autocomplete="new-password"
+										/>
+										<label for="reset-password">
+											<i class="ri-lock-line"></i> Nova
+											senha
+										</label>
+										<small class="form-text text-muted">
+											Mínimo de 6 caracteres
+										</small>
+									</div>
+
+									<div class="form-floating mb-3">
+										<input
+											type="password"
+											class="form-control"
+											id="reset-password-confirm"
+											required
+											minlength="6"
+											placeholder="Confirmar senha"
+											autocomplete="new-password"
+										/>
+										<label for="reset-password-confirm">
+											<i
+												class="ri-lock-password-line"
+											></i>
+											Confirmar senha
+										</label>
+									</div>
+
+									<div class="d-grid mb-3">
+										<button
+											type="submit"
+											class="btn btn-login btn-lg"
+											id="reset-submit-btn"
+										>
+											<i class="ri-refresh-line"></i>
+											Redefinir Senha
+										</button>
+									</div>
+								</form>
+
+								<div class="text-center mt-4">
+									<a
+										href="login.html"
+										class="text-decoration-none"
+									>
+										<i class="ri-arrow-left-line"></i>
+										Voltar para o login
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Scripts -->
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+		<script type="module">
+			import { initResetPassword } from "./src/js/modules/auth/reset.js";
+			$(document).ready(() => {
+				initResetPassword();
+			});
+		</script>
+	</body>
+</html>

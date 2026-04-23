@@ -83,11 +83,16 @@
 												>Manter-me conectado</label
 											>
 										</div>
-										<a href="#" class="forgot-password-link"
+
+										<!-- Link "Esqueci minha senha" abre modal -->
+										<a
+											href="#"
+											data-bs-toggle="modal"
+											data-bs-target="#forgotModal"
+											class="forgot-password-link"
 											>Esqueci minha senha</a
 										>
 									</div>
-
 									<div class="d-grid">
 										<button
 											type="submit"
@@ -115,8 +120,68 @@
 				</div>
 			</div>
 		</div>
+
+		<!-- Modal de recuperação -->
+		<div
+			class="modal fade"
+			id="forgotModal"
+			tabindex="-1"
+			aria-labelledby="forgotModalLabel"
+			aria-hidden="true"
+		>
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="forgotModalLabel">
+							Recuperar senha
+						</h5>
+						<button
+							type="button"
+							class="btn-close"
+							data-bs-dismiss="modal"
+							aria-label="Close"
+						></button>
+					</div>
+					<div class="modal-body">
+						<p class="text-muted mb-3">
+							Digite seu e-mail corporativo para receber
+							instruções de redefinição de senha.
+						</p>
+						<form id="forgot-form">
+							<div class="mb-3">
+								<label for="forgot-email" class="form-label"
+									>E-mail corporativo</label
+								>
+								<input
+									type="email"
+									class="form-control"
+									id="forgot-email"
+									required
+									placeholder="seu.nome@atacadao.com.br"
+								/>
+							</div>
+							<button type="submit" class="btn btn-primary w-100">
+								<i class="ri-mail-send-line"></i> Enviar link de
+								redefinição
+							</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ✅ SCRIPTS NA ORDEM CORRETA -->
 		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+		<!-- ✅ ADICIONAR BOOTSTRAP JS (FALTAVA!) -->
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+		<!-- ✅ SEUS MÓDULOS DEPOIS -->
 		<script type="module" src="./src/js/modules/auth/login.js"></script>
+		<script type="module">
+			import { initForgotPassword } from "./src/js/modules/auth/reset.js";
+			$(document).ready(() => {
+				initForgotPassword();
+			});
+		</script>
 	</body>
 </html>

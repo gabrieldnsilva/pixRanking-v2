@@ -1,12 +1,12 @@
 <?php
 
-// api/config.php
+// ./config/dbConfig.php
 
-// --- Configurações do Banco de Dados MariaDB ---
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'ranking_db');
-define('DB_USER', 'local_admin');
-define('DB_PASS', 'admin');
+// --- Configurações do banco de dados MariaDB ---
+define("DB_HOST", "localhost");
+define("DB_NAME", "atc_portal");
+define("DB_USER", "filial945");
+define("DB_PASS", "senhafilial");
 
 // --- Configurações de Cabeçalho para a API ---
 header("Access-Control-Allow-Origin: *");
