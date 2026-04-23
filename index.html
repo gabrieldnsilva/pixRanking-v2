@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 	<head>
 		<meta charset="UTF-8" />
@@ -119,6 +119,20 @@
 								>
 							</li>
 						</ul>
+						<ul class="nav-list">
+							<li>
+								<a
+									href="#"
+									class="nav-link"
+									id="missing-operators-badge"
+									data-perm="manage-operators"
+								>
+									<i class="ri-alert-line"></i>
+									<span>Operadoras Ausentes</span>
+									<span class="d-none"></span>
+								</a>
+							</li>
+						</ul>
 					</ul>
 				</nav>
 				<div class="sidebar-footer">
@@ -134,7 +148,11 @@
 			<div class="main-content">
 				<header class="main-header">
 					<div class="header-content">
-						<h1>Ranking Operadoras</h1>
+						<h1 align="center" class="header-title">
+							<i class="ri-bar-chart-box-line"
+								>Ranking Operadoras</i
+							>
+						</h1>
 						<button id="logout-btn" class="btn btn-outline-danger">
 							<i class="ri-logout-box-r-line"></i> Sair
 						</button>
@@ -143,101 +161,155 @@
 
 				<main class="container-fluid">
 					<section id="ranking-view" class="view active-view">
-						<div class="card shadow-sm">
-							<div class="card-header">
-								<h3>
-									Ranking Geral de Operadoras por Transações
-									PIX
-								</h3>
-							</div>
-							<div class="card-body">
-								<div class="row">
-									<div class="col-md-6 mb-4">
-										<canvas id="top3-chart"></canvas>
-									</div>
-									<div class="col-md-6 mb-4">
-										<canvas
-											id="top3-proportion-chart"
-										></canvas>
+						<div class="container-fluid">
+							<!-- ✅ NOVO: Barra de busca e contador de resultados -->
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<div class="input-group">
+										<span class="input-group-text">
+											<i class="ri-search-line"></i>
+										</span>
+										<input
+											type="text"
+											id="operator-search"
+											class="form-control"
+											placeholder="Buscar por nome ou número da operadora..."
+											autocomplete="off"
+										/>
+										<button
+											id="clear-search-btn"
+											class="btn btn-outline-secondary"
+											type="button"
+											style="display: none"
+											title="Limpar busca"
+										>
+											<i class="ri-close-line"></i>
+										</button>
 									</div>
 								</div>
-								<p class="text-muted">
-									Selecione os arquivos de transações na barra
-									lateral para gerar o ranking
-								</p>
-								<div class="table-responsive">
-									<table
-										class="table table-hover align-middle"
-									>
-										<thead>
-											<tr>
-												<th>Posição</th>
-												<th>Nome</th>
-												<th>Nº Operadora</th>
-												<th>Transações PIX</th>
-												<th>Transações Débito</th>
-												<th>Proporção PIX</th>
-												<th>Ações</th>
-											</tr>
-										</thead>
-										<tbody id="ranking-body"></tbody>
-									</table>
-								</div>
-								<nav
-									class="d-flex justify-content-end align-items-center mt-3"
-								>
+								<div class="col-md-6 d-flex align-items-center">
 									<span
-										id="page-info"
-										class="me-3 text-muted"
+										id="results-count"
+										class="text-muted ms-3"
 									></span>
-									<div class="btn-group">
-										<button
-											id="prev-page-btn"
-											class="btn btn-outline-secondary"
-										>
-											<i class="ri-arrow-left-s-line"></i
-											>Anterior
-										</button>
-										<button
-											id="next-page-btn"
-											class="btn btn-outline-secondary"
-										>
-											Próximo
-											<i class="ri-arrow-right-s-line">
-											</i>
-										</button>
-									</div>
-								</nav>
-								<div class="footer-dashboard-actions">
-									<!-- Botão para exportar PDF -->
-									<button
-										id="export-ranking-pdf"
-										class="btn btn-primary"
-										disabled
-									>
-										<i class="ri-file-pdf-2-fill"></i>
-										Exportar Ranking (PDF)
-									</button>
-
-									<!-- Botão para salvar relatórios-->
-									<button
-										id="save-report-btn"
-										class="btn btn-success"
-										data-perm="upload-csv"
-										disabled
-									>
-										<i class="ri-save-3-line"></i>Salvar
-										Relatório
-									</button>
-									<button
-										id="open-saved-reports"
-										class="btn btn-outline-secondary"
-										data-perm="view-reports"
-									>
-										<i class="ri-history-line"></i>
-										Relatórios Salvos
-									</button>
 								</div>
+							</div>
+
+							<!-- Gráficos TOP 3 -->
+							<div class="row">
+								<div class="col-md-6 mb-4">
+									<canvas id="top3-chart"></canvas>
+								</div>
+								<div class="col-md-6 mb-4">
+									<canvas id="top3-proportion-chart"></canvas>
+								</div>
+							</div>
+
+							<!-- Tabela de Ranking -->
+							<div class="table-responsive">
+								<table class="table table-hover align-middle">
+									<thead>
+										<tr>
+											<th>Posição</th>
+											<th>Nome</th>
+											<th>Nº Operadora</th>
+											<th
+												class="sortable-header"
+												data-column="pixTransactions"
+											>
+												Transações PIX
+												<i
+													class="ri-arrow-up-down-line sort-icon"
+												></i>
+											</th>
+											<th
+												class="sortable-header"
+												data-column="pixValue"
+											>
+												Valor Total PIX
+												<i
+													class="ri-arrow-up-down-line sort-icon"
+												></i>
+											</th>
+											<th
+												class="sortable-header"
+												data-column="debitTransactions"
+											>
+												Transações Débito
+												<i
+													class="ri-arrow-up-down-line sort-icon"
+												></i>
+											</th>
+											<th
+												class="sortable-header"
+												data-column="pixProportion"
+											>
+												Proporção PIX
+												<i
+													class="ri-arrow-up-down-line sort-icon"
+												></i>
+											</th>
+											<th>Ações</th>
+										</tr>
+									</thead>
+									<tbody id="ranking-body"></tbody>
+								</table>
+							</div>
+							<!-- Paginação -->
+							<div
+								class="d-flex justify-content-between align-items-center mt-3"
+							>
+								<button
+									id="prev-page-btn"
+									class="btn btn-outline-primary"
+								>
+									<i class="ri-arrow-left-line"></i> Anterior
+								</button>
+								<span id="page-info" class="text-muted"></span>
+								<button
+									id="next-page-btn"
+									class="btn btn-outline-primary"
+								>
+									Próxima <i class="ri-arrow-right-line"></i>
+								</button>
+							</div>
+							<nav
+								class="d-flex justify-content-end align-items-center mt-3"
+							>
+								<span
+									id="page-info"
+									class="me-3 text-muted"
+								></span>
+							</nav>
+							<div class="footer-dashboard-actions">
+								<!-- Botão para exportar PDF -->
+								<button
+									id="export-ranking-pdf"
+									class="btn btn-primary"
+									disabled
+								>
+									<i class="ri-file-pdf-2-fill"></i>
+									Exportar Ranking (PDF)
+								</button>
+
+								<!-- Botão para salvar relatórios-->
+								<button
+									id="save-report-btn"
+									class="btn btn-success"
+									data-perm="upload-csv"
+									disabled
+								>
+									<i class="ri-save-3-line"></i>Salvar
+									Relatório
+								</button>
+								<button
+									id="open-saved-reports"
+									class="btn btn-outline-secondary"
+									data-perm="view-reports"
+								>
+									<i class="ri-history-line"></i>
+									Relatórios Salvos
+								</button>
 							</div>
 						</div>
 					</section>
@@ -457,6 +529,69 @@
 			</div>
 		</div>
 
+		<!-- ⬇️ NOVO MODAL: Período para Exportação PDF -->
+		<div
+			class="modal fade"
+			id="pdfPeriodModal"
+			tabindex="-1"
+			aria-labelledby="pdfPeriodModalLabel"
+			aria-hidden="true"
+		>
+			<div class="modal-dialog">
+				<form id="pdf-period-form" class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="pdfPeriodModalLabel">
+							Período do Relatório
+						</h5>
+						<button
+							type="button"
+							class="btn-close"
+							data-bs-dismiss="modal"
+							aria-label="Fechar"
+						></button>
+					</div>
+					<div class="modal-body">
+						<div class="mb-3">
+							<label for="pdf-data-inicial" class="form-label"
+								>Data Inicial</label
+							>
+							<input
+								type="date"
+								class="form-control"
+								id="pdf-data-inicial"
+								name="pdf_data_inicial"
+								required
+							/>
+						</div>
+						<div class="mb-3">
+							<label for="pdf-data-final" class="form-label"
+								>Data Final</label
+							>
+							<input
+								type="date"
+								class="form-control"
+								id="pdf-data-final"
+								name="pdf_data_final"
+								required
+							/>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-success">
+							<i class="ri-file-pdf-2-fill"></i> Gerar PDF
+						</button>
+						<button
+							type="button"
+							class="btn btn-secondary"
+							data-bs-dismiss="modal"
+						>
+							Cancelar
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
 		<!-- Modal: Relatórios Salvos -->
 		<div
 			class="modal fade"
@@ -511,6 +646,59 @@
 							data-bs-dismiss="modal"
 						>
 							Fechar
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- Modal: Operadoras Ausentes -->
+		<div
+			class="modal fade"
+			id="missingOperatorsModal"
+			tabindex="-1"
+			aria-labelledby="missingOperatorsLabel"
+			aria-hidden="true"
+		>
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="missingOperatorsLabel">
+							<i class="ri-alert-line text-warning"></i>
+							Operadoras Não Cadastradas
+						</h5>
+						<button
+							type="button"
+							class="btn-close"
+							data-bs-dismiss="modal"
+							aria-label="Fechar"
+						></button>
+					</div>
+					<div class="modal-body">
+						<div class="alert alert-info" role="alert">
+							<i class="ri-information-line"></i>
+							As operadoras listadas abaixo aparecem nos CSVs de
+							transações (PIX/Débito) mas não estão cadastradas no
+							sistema. Cadastre-as para incluí-las no ranking.
+						</div>
+						<div id="missing-operators-content">
+							<!-- Conteúdo será preenchido dinamicamente -->
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button
+							type="button"
+							class="btn btn-secondary"
+							data-bs-dismiss="modal"
+						>
+							Fechar
+						</button>
+						<button
+							type="button"
+							id="go-to-crud-from-missing"
+							class="btn btn-primary"
+						>
+							<i class="ri-settings-3-line"></i> Ir para
+							Gerenciamento
 						</button>
 					</div>
 				</div>

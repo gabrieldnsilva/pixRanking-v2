@@ -384,6 +384,81 @@ body {
 	transition: all 0.3s ease;
 }
 
+/* ===== BUSCA DE TABELA ===== */
+#operator-search {
+	border-left: none;
+}
+
+#operator-search:focus {
+	box-shadow: none;
+	border-color: var(--primary-color);
+}
+
+.input-group-text {
+	background-color: #fff;
+	border-right: none;
+}
+
+#clear-search-btn {
+	border-left: none;
+}
+
+#results-count {
+	font-size: 0.875rem;
+}
+
+#results-count strong {
+	color: var(--primary-color);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+	#results-count {
+		margin-top: 0.5rem;
+		margin-left: 0 !important;
+	}
+}
+
+/* ===== FILTROS DE TABELA ===== */
+.sortable-header {
+	cursor: pointer;
+	user-select: none;
+	position: relative;
+	transition: background-color 0.2s ease;
+}
+
+.sortable-header:hover {
+	background-color: rgba(13, 110, 253, 0.1);
+}
+
+.sortable-header .sort-icon {
+	opacity: 0.3;
+	margin-left: 0.5rem;
+	transition: opacity 0.2s ease;
+}
+
+.sortable-header:hover .sort-icon {
+	opacity: 0.6;
+}
+
+/* Indicadores de ordenação ativa */
+.sortable-header.sort-asc .sort-icon::before {
+	content: "\EA78"; /* ri-arrow-up-line */
+	opacity: 1;
+	color: var(--primary-color);
+}
+
+.sortable-header.sort-desc .sort-icon::before {
+	content: "\EA4E"; /* ri-arrow-down-line */
+	opacity: 1;
+	color: var(--primary-color);
+}
+
+.sortable-header.sort-asc .sort-icon,
+.sortable-header.sort-desc .sort-icon {
+	opacity: 1;
+}
+
 /* Modal com efeito de entrada com raios */
 .modal-content {
 	border-radius: 0.75rem;
